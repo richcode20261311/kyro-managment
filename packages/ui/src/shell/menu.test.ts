@@ -17,6 +17,7 @@ import {
   Users,
 } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
+import { RESOURCE_IDS, ROLES, VISIBLE_RESOURCES } from '@aki/shared';
 import { bottomNavIds, itemCount, menuSections, visibleSections } from './menu';
 
 const flat = menuSections.flatMap((section) => section.items);
@@ -91,5 +92,20 @@ describe('menú filtrado por rol', () => {
 
   it('la barra inferior móvil usa los 5 accesos definidos', () => {
     expect([...bottomNavIds]).toEqual(['mesas', 'pedidos', 'caja', 'clientes']);
+  });
+});
+
+describe('paridad con @aki/shared (permisos y recursos)', () => {
+  it('los ids del menú son exactamente RESOURCE_IDS, en orden', () => {
+    expect(flat.map((item) => item.id)).toEqual([...RESOURCE_IDS]);
+  });
+
+  it('la visibilidad por rol del menú coincide con VISIBLE_RESOURCES', () => {
+    for (const role of ROLES) {
+      const menuIds = visibleSections(role).flatMap((section) =>
+        section.items.map((item) => item.id),
+      );
+      expect(menuIds).toEqual([...VISIBLE_RESOURCES[role]]);
+    }
   });
 });

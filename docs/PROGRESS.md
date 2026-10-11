@@ -2,16 +2,16 @@
 
 Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre sesiones: cualquier sesión nueva debe leerlo antes de empezar.
 
-**Última actualización:** 2026-10-10
-**Fase actual:** 1 completada — monorepo, tokens, `AppShell`, componentes, estados y PWA base; pendiente aprobación de plan de Fase 2
-**Rama:** main
+**Última actualización:** 2026-10-11
+**Fase actual:** 2 en curso — tarea 1 (base de datos multi-tenant con RLS) completada
+**Rama:** fase-2-acceso
 
 ## Estado por fase
 
 - [x] **Fase 0a:** reconocimiento inicial (22 pantallas nombradas)
 - [x] **Fase 0b:** reconocimiento completo (116 "Generating Screen..." clasificadas, 138 totales)
 - [x] **Fase 1:** cimientos (F1, F2, F3) — ver `docs/PLAN-FASE-1.md`
-- [ ] **Fase 2:** acceso y centro de control (A1 a A5, C1 a C4)
+- [ ] **Fase 2:** acceso y centro de control (A1 a A5, C1 a C4) — en curso, plan aprobado en `docs/PLAN-FASE-2.md`
 - [ ] **Fase 3:** salón y pedidos (P1 a P10)
 - [ ] **Fase 4:** cocina (K1 a K5)
 - [ ] **Fase 5:** domicilios (P11 a P14)
@@ -137,6 +137,12 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2026-10-11 | Serwist vía `@serwist/turbopack` (no `@serwist/next`) | Mismo stack; el paquete `next` no soporta Turbopack. Riesgo: integración experimental |
 | 2026-10-11 | Ajustes de contraste AA: `aki-muted #5C6470`, texto activo en `aki-error`, `aki-success-ink #1F5E3C` | AGENTS.md exige AA; los valores originales daban 4.1–4.4:1 |
 | 2026-10-11 | `design/` y scripts de descarga fuera de git y de todos los builds | `.gitignore` + `tsconfig.base.json`; `.dockerignore` en Fase 10 |
+| 2026-10-11 | Prisma fijado en **7.10.0** (estable): `prisma@latest` apunta al RC de v8 con CLI nueva de contratos | Evitar RC; en v7 la URL vive en `prisma.config.ts` y el cliente usa driver adapter `@prisma/adapter-pg` |
+| 2026-10-11 | Rol de PostgreSQL `aki_app` (no superusuario) para runtime; `aki` (superuser) para migraciones/seed | RLS no aplica a superusers; políticas con `FORCE` y variable `app.tenant_id` fijada por transacción (`withTenant`) — sin variable no se ve ninguna fila |
+| 2026-10-11 | Seed de desarrollo: tenant AKI, 2 sedes, 5 usuarios (uno por rol) con credenciales conocidas, matriz de permisos y notificaciones | Probable el flujo login → sede → turno; solo corre en local |
+| 2026-10-11 | Recursos (16 ids) y acciones de permiso en `@aki/shared` con test de paridad contra el menú de `@aki/ui` | Fuente única para guard de permisos y seed |
+| 2026-10-11 | Captura visual del panel congela el reloj (`page.clock`) además de enmascarar la fecha | La máscara no cubría el cambio de ancho diario del texto de fecha |
+| 2026-10-11 | Aviso operativo: no ejecutar builds/servidores como root | Una sesión root creó `apps/api/dist` y `apps/web/.next` con dueño root; se corrigió con un contenedor Docker con `chown 1000:1000` |
 
 ## Fase 1 — Cimientos (plan en `docs/PLAN-FASE-1.md`, rama `fase-1-cimientos`)
 
@@ -149,8 +155,22 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 5. Primitivos `packages/ui` | ✅ |
 | 6. Estados globales F3 | ✅ |
 | 7. Hoja de componentes F1 | ✅ |
-| 8. Pruebas (axe + visual + regresión) | ⏳ |
+| 8. Pruebas (axe + visual + regresión) | ✅ |
 | 9. Serwist + Dexie | ✅ |
+
+## Fase 2 — Acceso y centro de control (plan en `docs/PLAN-FASE-2.md`, rama `fase-2-acceso`)
+
+| Tarea | Estado |
+|---|---|
+| 1. Docker Compose + Prisma + schema multi-tenant + RLS + seed | ✅ |
+| 2. API auth (correo, PIN, refresh, recuperación) + guards + auditoría | ⏳ |
+| 3. Infra frontend: TanStack Query, cliente HTTP con token, Zustand sesión, middleware de rutas | ⏳ |
+| 4. A1 + A3 (login y recuperar) | ⏳ |
+| 5. A2 + A4 + A5 (PIN, sede, turno) | ⏳ |
+| 6. API sedes, turnos/caja, notificaciones, búsqueda global | ⏳ |
+| 7. C1 + C2 + C3 + C4 | ⏳ |
+| 8. Pruebas: flujo completo 3 viewports, axe, visual | ⏳ |
+| 9. Cierre y PROGRESS | ⏳ |
 
 ## Bloqueos y preguntas abiertas
 

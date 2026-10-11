@@ -1,0 +1,38 @@
+# Servicios locales de AKI Admin (desarrollo). Sin secretos reales.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aki-postgres
+    environment:
+      POSTGRES_USER: aki
+      POSTGRES_PASSWORD: aki_dev_password
+      POSTGRES_DB: aki_admin
+    ports:
+      - '5432:5432'
+    volumes:
+      - aki-pgdata:/var/lib/postgresql/data
+      # Rol de aplicación (no superusuario) para que RLS aplique. Solo corre
+      # al crear el volumen por primera vez.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aki -d aki_admin']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: aki-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - aki-redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  aki-pgdata:
+  aki-redisdata:

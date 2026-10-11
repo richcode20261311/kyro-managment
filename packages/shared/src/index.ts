@@ -14,4 +14,14 @@ export {
   type TenantId,
 } from './idempotency';
 export { t, type Catalog } from './catalog';
+export {
+  PERMISSION_ACTIONS,
+  RESOURCE_IDS,
+  ROLES,
+  VISIBLE_RESOURCES,
+  WRITE_RESOURCES,
+  type PermissionAction,
+  type ResourceId,
+  type RoleId,
+} from './resources';
 export type { Auditable, GlobalScreenStatus, Paginated, TenantScoped } from './types';

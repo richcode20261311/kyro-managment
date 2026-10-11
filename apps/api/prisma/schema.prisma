@@ -1,0 +1,188 @@
+// Schema multi-tenant de AKI Admin (Fase 2).
+// Reglas: tenant_id en todas las tablas de negocio + RLS en PostgreSQL (ver migración 0002).
+// Dinero COP: enteros (Decimal sin decimales). IDs base: uuid del servidor;
+// IDs de negocio (pedidos, líneas) los genera el cliente con UUIDv7.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// En Prisma 7 la URL de conexión vive en prisma.config.ts (CLI) y en el
+// driver adapter (runtime), no en el schema.
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMINISTRADOR
+  CAJERO
+  MESERO
+  COCINERO
+  DOMICILIARIO
+}
+
+enum PermissionAction {
+  VER
+  CREAR
+  EDITAR
+  ANULAR
+  APROBAR
+}
+
+enum NotificationKind {
+  INFO
+  SUCCESS
+  WARNING
+  DANGER
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sedes         Sede[]
+  users         User[]
+  permissions   Permission[]
+  shifts        Shift[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+}
+
+model Sede {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  address   String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users  UserSede[]
+  shifts Shift[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  email        String
+  passwordHash String?
+  pin          String?
+  name         String
+  role         Role
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sedes           UserSede[]
+  shiftsOpened    Shift[]        @relation("ShiftOpener")
+  shiftsClosed    Shift[]        @relation("ShiftCloser")
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  recoveryTokens  RecoveryToken[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId, role])
+}
+
+model UserSede {
+  userId String
+  sedeId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sede Sede @relation(fields: [sedeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, sedeId])
+}
+
+/// Permisos por rol y acción (PHASES.md). Sembrados en el seed; ajustables por tenant.
+model Permission {
+  id       String           @id @default(uuid())
+  tenantId String
+  role     Role
+  resource String
+  action   PermissionAction
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, role, resource, action])
+  @@index([tenantId, role])
+}
+
+/// Turno de caja: se abre en A5; cierre y arqueo llegan en Fase 6.
+model Shift {
+  id           String    @id @default(uuid())
+  tenantId     String
+  sedeId       String
+  openedBy     String
+  openedAt     DateTime  @default(now())
+  initialCash  Decimal   @db.Decimal(14, 0)
+  closedAt     DateTime?
+  countedCash  Decimal?  @db.Decimal(14, 0)
+  difference   Decimal?  @db.Decimal(14, 0)
+  closedBy     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sede   Sede   @relation(fields: [sedeId], references: [id], onDelete: Cascade)
+  opener User   @relation("ShiftOpener", fields: [openedBy], references: [id])
+  closer User?  @relation("ShiftCloser", fields: [closedBy], references: [id])
+
+  @@index([tenantId, sedeId, closedAt])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  tenantId  String
+  userId    String?
+  kind      NotificationKind @default(INFO)
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, readAt])
+  @@index([tenantId, createdAt])
+}
+
+/// Auditoría obligatoria: anulaciones, descuentos, cambios de precio, cierres,
+/// cambios de permisos e impresiones (PHASES.md).
+model AuditLog {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  action    String
+  resource  String
+  entityId  String?
+  reason    String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, resource, entityId])
+}
+
+model RecoveryToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
