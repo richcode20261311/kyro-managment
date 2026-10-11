@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSerwist } from '@serwist/turbopack';
 
 const nextConfig: NextConfig = {
   // design/ vive en la raíz del repo, fuera de apps/web: TypeScript y Next no la ven.
@@ -7,4 +8,4 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

@@ -1,0 +1,19 @@
+{
+  "name": "AKI Admin",
+  "short_name": "AKI",
+  "description": "Gestión de restaurantes — AKI Cocina Oriental",
+  "start_url": "/panel",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#F5F5F5",
+  "background_color": "#F5F5F5",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "/brand/aki-logo.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
