@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { authenticate } from './helpers';
 
-const pages = ['/', '/panel', '/dev/componentes'];
+const pages = ['/', '/login', '/recuperar', '/panel', '/dev/componentes'];
 
 for (const path of pages) {
   test(`accesibilidad sin errores críticos en ${path}`, async ({ page }, testInfo) => {

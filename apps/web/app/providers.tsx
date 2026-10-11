@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { refreshSession } from '../lib/api/client';
+import { keepSessionEnabled } from '../lib/auth/keep-session';
 import { useSession } from '../lib/auth/session';
 
 /**
@@ -21,7 +22,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (!useSession.getState().accessToken) {
+    // "Mantener sesión iniciada" (A1) controla la restauración silenciosa.
+    if (keepSessionEnabled() && !useSession.getState().accessToken) {
       void refreshSession();
     }
   }, []);

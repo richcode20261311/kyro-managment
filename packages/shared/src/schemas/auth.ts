@@ -62,3 +62,15 @@ export const recoveryResetSchema = z.object({
   newPassword: passwordSchema,
 });
 export type RecoveryResetInput = z.infer<typeof recoveryResetSchema>;
+
+/** Paso 3 de A3 en el cliente: nueva contraseña + confirmación que deben coincidir. */
+export const recoveryPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirm: z.string().min(1, 'Confirma la contraseña'),
+  })
+  .refine((values) => values.password === values.confirm, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirm'],
+  });
+export type RecoveryPasswordInput = z.infer<typeof recoveryPasswordSchema>;

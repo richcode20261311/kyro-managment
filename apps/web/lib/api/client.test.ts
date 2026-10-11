@@ -106,4 +106,17 @@ describe('cliente HTTP', () => {
 
     await expect(api.post('/auth/logout')).resolves.toBeUndefined();
   });
+
+  it('tolera un 202 con cuerpo vacío (recuperación de contraseña)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 202,
+      json: async () => {
+        throw new SyntaxError('Unexpected end of JSON input');
+      },
+    } as unknown as Response);
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(api.post('/auth/recovery/request', {})).resolves.toBeUndefined();
+  });
 });

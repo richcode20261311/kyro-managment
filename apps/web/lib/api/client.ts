@@ -86,8 +86,10 @@ async function request<T>(
     const body: unknown = await res.json().catch(() => null);
     throw new ApiError(res.status, errorMessage(body));
   }
+  // 204 o 202 con cuerpo vacío (por ejemplo, /auth/recovery/request).
   if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+  const data: unknown = await res.json().catch(() => undefined);
+  return data as T;
 }
 
 /** Cliente HTTP: adjunta el token, gestiona cookies y traduce errores. */

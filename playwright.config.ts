@@ -28,10 +28,19 @@ export default defineConfig({
       use: { viewport: { width: 390, height: 844 } },
     },
   ],
-  webServer: {
-    command: 'pnpm --filter @aki/web dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      // La API hace falta para los flujos de autenticación (A1/A3) contra datos reales.
+      command: 'pnpm --filter @aki/api dev',
+      url: 'http://localhost:3001/api/auth/employees?tenant=aki',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: 'pnpm --filter @aki/web dev',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });
