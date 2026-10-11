@@ -3,14 +3,14 @@
 Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre sesiones: cualquier sesión nueva debe leerlo antes de empezar.
 
 **Última actualización:** 2026-10-10
-**Fase actual:** 0c completada — tabla canónica en `docs/STITCH-INVENTORY.md`; pendiente plan de Fase 1
+**Fase actual:** 1 completada — monorepo, tokens, `AppShell`, componentes, estados y PWA base; pendiente aprobación de plan de Fase 2
 **Rama:** main
 
 ## Estado por fase
 
 - [x] **Fase 0a:** reconocimiento inicial (22 pantallas nombradas)
 - [x] **Fase 0b:** reconocimiento completo (116 "Generating Screen..." clasificadas, 138 totales)
-- [ ] **Fase 1:** cimientos (F1, F2, F3)
+- [x] **Fase 1:** cimientos (F1, F2, F3) — ver `docs/PLAN-FASE-1.md`
 - [ ] **Fase 2:** acceso y centro de control (A1 a A5, C1 a C4)
 - [ ] **Fase 3:** salón y pedidos (P1 a P10)
 - [ ] **Fase 4:** cocina (K1 a K5)
@@ -134,6 +134,9 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2026-10-10 | A2-login-pin-dup movido a design/stitch/_archivo/ | No borrar, conservar historial |
 | 2026-10-10 | Orden de fases según docs/PHASES.md | Pantallas sin referencia visual van al final de su fase |
 | 2026-10-10 | Tabla canónica en `docs/STITCH-INVENTORY.md`; versión oficial se elige por cumplimiento del contrato, no por antigüedad | Múltiples duplicados en Stitch |
+| 2026-10-11 | Serwist vía `@serwist/turbopack` (no `@serwist/next`) | Mismo stack; el paquete `next` no soporta Turbopack. Riesgo: integración experimental |
+| 2026-10-11 | Ajustes de contraste AA: `aki-muted #5C6470`, texto activo en `aki-error`, `aki-success-ink #1F5E3C` | AGENTS.md exige AA; los valores originales daban 4.1–4.4:1 |
+| 2026-10-11 | `design/` y scripts de descarga fuera de git y de todos los builds | `.gitignore` + `tsconfig.base.json`; `.dockerignore` en Fase 10 |
 
 ## Fase 1 — Cimientos (plan en `docs/PLAN-FASE-1.md`, rama `fase-1-cimientos`)
 
@@ -147,7 +150,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 6. Estados globales F3 | ✅ |
 | 7. Hoja de componentes F1 | ✅ |
 | 8. Pruebas (axe + visual + regresión) | ⏳ |
-| 9. Serwist + Dexie | ⏳ |
+| 9. Serwist + Dexie | ✅ |
 
 ## Bloqueos y preguntas abiertas
 
