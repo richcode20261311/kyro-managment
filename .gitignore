@@ -1,0 +1,33 @@
+# Dependencias y builds
+node_modules/
+.turbo/
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Entorno: nunca subir secretos
+.env
+.env.*
+!.env.example
+
+# Pruebas y reportes
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Editores y SO
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Referencia de diseño: fuente de solo lectura (Stitch), excluida de builds
+design/
+
+# Scripts de descarga puntual de Stitch (no forma parte del producto)
+download-*.js
+download_*.sh
