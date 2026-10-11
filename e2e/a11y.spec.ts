@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { authenticate } from './helpers';
 
 const pages = ['/', '/panel', '/dev/componentes'];
 
@@ -10,6 +11,7 @@ for (const path of pages) {
       test.skip();
     }
 
+    if (path === '/panel') await authenticate(page);
     await page.goto(path);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

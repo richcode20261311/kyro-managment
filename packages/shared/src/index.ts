@@ -25,6 +25,8 @@ export {
   recoveryRequestSchema,
   recoveryResetSchema,
   recoveryVerifySchema,
+  type AuthResponse,
+  type KioskEmployee,
   type KioskQuery,
   type LoginInput,
   type PinLoginInput,
@@ -33,11 +35,14 @@ export {
   type RecoveryVerifyInput,
 } from './schemas/auth';
 export {
+  DB_ROLES,
   PERMISSION_ACTIONS,
   RESOURCE_IDS,
   ROLES,
   VISIBLE_RESOURCES,
   WRITE_RESOURCES,
+  menuRoleOf,
+  type DbRole,
   type PermissionAction,
   type ResourceId,
   type RoleId,

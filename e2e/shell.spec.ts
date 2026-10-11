@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { authenticate } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  await authenticate(page);
+});
 
 test('el panel carga con el shell activo y sin desbordamiento', async ({ page }) => {
   await page.goto('/panel');

@@ -3,7 +3,7 @@
 Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre sesiones: cualquier sesión nueva debe leerlo antes de empezar.
 
 **Última actualización:** 2026-10-11
-**Fase actual:** 2 en curso — tareas 1 (base de datos + RLS) y 2 (API de autenticación) completadas
+**Fase actual:** 2 en curso — tareas 1 (base de datos + RLS), 2 (API de autenticación) y 3 (infra frontend de sesión) completadas
 **Rama:** fase-2-acceso
 
 ## Estado por fase
@@ -148,6 +148,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2026-10-11 | Recuperación A3: código de 6 dígitos, vigencia 15 min, hasheado con scrypt y de un solo uso; respuesta idempotente aunque el correo no exista | Sin fugas de información; `EMAIL_PROVIDER=log` en desarrollo y `brevo` (SMTP) en producción, interfaz intercambiable |
 | 2026-10-11 | `@aki/shared` se compila a `dist/` (CommonJS) y `turbo dev` depende de `^build` | El API NestJS (CJS) no puede ejecutar el TypeScript fuente del paquete; Next y Vitest consumen `dist` sin cambios |
 | 2026-10-11 | `consistent-type-imports` desactivado en `apps/api` | NestJS inyecta por constructor con `emitDecoratorMetadata`: las clases inyectadas deben importarse como valores o la DI falla en runtime |
+| 2026-10-11 | Cliente HTTP de la web: un solo refresh en vuelo (dedupe), reintento único ante 401 y evento `aki:sesion-expirada` que dispara la salida al login; `middleware.ts` protege rutas por presencia de la cookie `aki_refresh` y guarda el destino en `?sigue=` | La validez la confirma la API al cargar datos; las specs e2e siembran la cookie con `e2e/helpers.ts` |
 
 ## Fase 1 — Cimientos (plan en `docs/PLAN-FASE-1.md`, rama `fase-1-cimientos`)
 
@@ -169,7 +170,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 |---|---|
 | 1. Docker Compose + Prisma + schema multi-tenant + RLS + seed | ✅ |
 | 2. API auth (correo, PIN, refresh, recuperación) + guards + auditoría | ✅ |
-| 3. Infra frontend: TanStack Query, cliente HTTP con token, Zustand sesión, middleware de rutas | ⏳ |
+| 3. Infra frontend: TanStack Query, cliente HTTP con token, Zustand sesión, middleware de rutas | ✅ |
 | 4. A1 + A3 (login y recuperar) | ⏳ |
 | 5. A2 + A4 + A5 (PIN, sede, turno) | ⏳ |
 | 6. API sedes, turnos/caja, notificaciones, búsqueda global | ⏳ |

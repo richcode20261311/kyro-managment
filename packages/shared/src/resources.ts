@@ -31,6 +31,21 @@ export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
 export const ROLES = ['administrador', 'cajero', 'mesero', 'cocinero', 'domiciliario'] as const;
 export type RoleId = (typeof ROLES)[number];
 
+/** Roles en base de datos (enum Prisma, mayúsculas). */
+export const DB_ROLES = [
+  'ADMINISTRADOR',
+  'CAJERO',
+  'MESERO',
+  'COCINERO',
+  'DOMICILIARIO',
+] as const;
+export type DbRole = (typeof DB_ROLES)[number];
+
+/** Rol de base de datos (mayúsculas) → rol del menú (minúsculas). */
+export function menuRoleOf(role: DbRole): RoleId {
+  return role.toLowerCase() as RoleId;
+}
+
 /**
  * Recursos que cada rol ve en el menú (DESIGN-CONTRACT §6).
  * Son la base de los permisos `VER`; las acciones de escritura se suman

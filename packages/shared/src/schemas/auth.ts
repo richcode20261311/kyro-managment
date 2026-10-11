@@ -1,6 +1,21 @@
 import { z } from 'zod';
+import type { DbRole } from '../resources';
 
 /** Esquemas de autenticación compartidos entre `apps/web` (formularios) y `apps/api` (validación). */
+
+/** Respuesta de login, pin-login y refresh. */
+export interface AuthResponse {
+  accessToken: string;
+  user: { id: string; name: string; email: string; role: DbRole };
+  tenant: { id: string; name: string; slug: string };
+}
+
+/** Empleado del kiosco (A2): nada de correos ni PINs. */
+export interface KioskEmployee {
+  id: string;
+  name: string;
+  role: DbRole;
+}
 
 export const emailSchema = z.string().trim().toLowerCase().email('Correo inválido');
 

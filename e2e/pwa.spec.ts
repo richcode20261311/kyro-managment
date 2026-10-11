@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { authenticate } from './helpers';
+
+test.beforeEach(async ({ page }) => {
+  await authenticate(page);
+});
 
 test('la PWA declara manifest, SW y página sin conexión', async ({ page, request }) => {
   await page.goto('/panel');

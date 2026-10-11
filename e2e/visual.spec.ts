@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { authenticate } from './helpers';
 
 /**
  * Regresión visual con capturas propias (las de Stitch son referencia, no baseline).
@@ -15,6 +16,7 @@ const maskDate = (page: Page) => [
 ];
 
 test('captura del panel', async ({ page }) => {
+  await authenticate(page);
   // Congela el reloj: la fecha real cambia el ancho del texto del encabezado y
   // la máscara por sí sola no cubre anchos distintos (rompía la captura cada día).
   await page.clock.install({ time: new Date('2026-10-10T10:00:00-05:00') });
