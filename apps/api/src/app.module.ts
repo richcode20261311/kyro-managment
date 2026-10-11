@@ -1,0 +1,8 @@
+import { Module } from '@nestjs/common';
+
+/**
+ * Carcasa de la API — se llena por vertical a partir de la Fase 2
+ * (autenticación, roles, sedes, turnos y caja).
+ */
+@Module({})
+export class AppModule {}

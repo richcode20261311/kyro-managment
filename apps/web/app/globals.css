@@ -1,0 +1,11 @@
+/* Tokens globales — la tarea 2 añade el preset completo de Tailwind. */
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #f5f5f5;
+  color: #111111;
+}

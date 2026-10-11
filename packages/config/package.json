@@ -1,0 +1,11 @@
+{
+  "name": "@aki/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig": "./tsconfig/base.json",
+    "./eslint": "./eslint/index.mjs",
+    "./tailwind": "./tailwind/index.ts"
+  }
+}
