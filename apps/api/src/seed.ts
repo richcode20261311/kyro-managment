@@ -122,7 +122,7 @@ async function main(): Promise<void> {
 
   for (const dev of DEV_USERS) {
     await prisma.user.upsert({
-      where: { tenantId_email: { tenantId: tenant.id, email: dev.email } },
+      where: { email: dev.email },
       update: { name: dev.name, role: dev.role, active: true },
       create: {
         tenantId: tenant.id,

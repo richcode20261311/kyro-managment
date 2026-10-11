@@ -15,6 +15,24 @@ export {
 } from './idempotency';
 export { t, type Catalog } from './catalog';
 export {
+  emailSchema,
+  kioskQuerySchema,
+  loginSchema,
+  passwordSchema,
+  pinLoginSchema,
+  pinSchema,
+  recoveryCodeSchema,
+  recoveryRequestSchema,
+  recoveryResetSchema,
+  recoveryVerifySchema,
+  type KioskQuery,
+  type LoginInput,
+  type PinLoginInput,
+  type RecoveryRequestInput,
+  type RecoveryResetInput,
+  type RecoveryVerifyInput,
+} from './schemas/auth';
+export {
   PERMISSION_ACTIONS,
   RESOURCE_IDS,
   ROLES,

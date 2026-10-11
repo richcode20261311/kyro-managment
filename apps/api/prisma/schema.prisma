@@ -46,6 +46,7 @@ model Tenant {
   sedes         Sede[]
   users         User[]
   permissions   Permission[]
+  sessions      Session[]
   shifts        Shift[]
   notifications Notification[]
   auditLogs     AuditLog[]
@@ -71,7 +72,9 @@ model Sede {
 model User {
   id           String   @id @default(uuid())
   tenantId     String
-  email        String
+  // Correo único GLOBAL (no por tenant): el login no tiene contexto de tenant
+  // y A1 solo pide correo + contraseña. Decisión registrada en PROGRESS.md.
+  email        String   @unique
   passwordHash String?
   pin          String?
   name         String
@@ -82,13 +85,13 @@ model User {
 
   tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   sedes           UserSede[]
+  sessions        Session[]
   shiftsOpened    Shift[]        @relation("ShiftOpener")
   shiftsClosed    Shift[]        @relation("ShiftCloser")
   notifications   Notification[]
   auditLogs       AuditLog[]
   recoveryTokens  RecoveryToken[]
 
-  @@unique([tenantId, email])
   @@index([tenantId, role])
 }
 
@@ -114,6 +117,23 @@ model Permission {
 
   @@unique([tenantId, role, resource, action])
   @@index([tenantId, role])
+}
+
+/// Sesión de refresh: permite cerrar sesión (revocar) y expirar por tiempo.
+model Session {
+  id        String    @id @default(uuid())
+  tenantId  String
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, revokedAt])
 }
 
 /// Turno de caja: se abre en A5; cierre y arqueo llegan en Fase 6.

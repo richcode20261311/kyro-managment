@@ -3,7 +3,7 @@
 Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre sesiones: cualquier sesión nueva debe leerlo antes de empezar.
 
 **Última actualización:** 2026-10-11
-**Fase actual:** 2 en curso — tarea 1 (base de datos multi-tenant con RLS) completada
+**Fase actual:** 2 en curso — tareas 1 (base de datos + RLS) y 2 (API de autenticación) completadas
 **Rama:** fase-2-acceso
 
 ## Estado por fase
@@ -143,6 +143,11 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2026-10-11 | Recursos (16 ids) y acciones de permiso en `@aki/shared` con test de paridad contra el menú de `@aki/ui` | Fuente única para guard de permisos y seed |
 | 2026-10-11 | Captura visual del panel congela el reloj (`page.clock`) además de enmascarar la fecha | La máscara no cubría el cambio de ancho diario del texto de fecha |
 | 2026-10-11 | Aviso operativo: no ejecutar builds/servidores como root | Una sesión root creó `apps/api/dist` y `apps/web/.next` con dueño root; se corrigió con un contenedor Docker con `chown 1000:1000` |
+| 2026-10-11 | Correo de usuario único GLOBAL (no por tenant); login resuelve el tenant con funciones SQL `SECURITY DEFINER` (`resolve_login_identity`, `resolve_user_identity`, `list_kiosk_employees`, EXECUTE solo para `aki_app`) | A1 solo pide correo + contraseña y corre sin contexto de tenant; RLS bloquearía la consulta. A2 (kiosco) lista empleados por slug: expone solo nombre, rol e id |
+| 2026-10-11 | Refresh token en cookie httpOnly con sesión revocable (modelo `Session`); se rota en cada refresh y logout la revoca | Permite cerrar sesión real y expirar por tiempo; access token de 15 min solo con Bearer |
+| 2026-10-11 | Recuperación A3: código de 6 dígitos, vigencia 15 min, hasheado con scrypt y de un solo uso; respuesta idempotente aunque el correo no exista | Sin fugas de información; `EMAIL_PROVIDER=log` en desarrollo y `brevo` (SMTP) en producción, interfaz intercambiable |
+| 2026-10-11 | `@aki/shared` se compila a `dist/` (CommonJS) y `turbo dev` depende de `^build` | El API NestJS (CJS) no puede ejecutar el TypeScript fuente del paquete; Next y Vitest consumen `dist` sin cambios |
+| 2026-10-11 | `consistent-type-imports` desactivado en `apps/api` | NestJS inyecta por constructor con `emitDecoratorMetadata`: las clases inyectadas deben importarse como valores o la DI falla en runtime |
 
 ## Fase 1 — Cimientos (plan en `docs/PLAN-FASE-1.md`, rama `fase-1-cimientos`)
 
@@ -163,7 +168,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | Tarea | Estado |
 |---|---|
 | 1. Docker Compose + Prisma + schema multi-tenant + RLS + seed | ✅ |
-| 2. API auth (correo, PIN, refresh, recuperación) + guards + auditoría | ⏳ |
+| 2. API auth (correo, PIN, refresh, recuperación) + guards + auditoría | ✅ |
 | 3. Infra frontend: TanStack Query, cliente HTTP con token, Zustand sesión, middleware de rutas | ⏳ |
 | 4. A1 + A3 (login y recuperar) | ⏳ |
 | 5. A2 + A4 + A5 (PIN, sede, turno) | ⏳ |
@@ -174,6 +179,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 
 ## Bloqueos y preguntas abiertas
 
+- **Rate limiting del login**: sin límite de intentos en Fase 2;保驾护arlo en la tarea de seguridad de la Fase 10
 - **R1–R5 (Reportes)**: Sin referencia visual en Stitch — diseñar desde cero al final de la Fase 9 (referencias: C1, M6, B8, I5, S7)
 - **Logo AKI**: Necesario archivo real en `apps/web/public/brand/aki-logo.png` (fondo transparente)
 - **Cotización Factus**: Proveedor DIAN por WhatsApp pendiente
