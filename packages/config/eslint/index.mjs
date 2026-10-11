@@ -13,6 +13,18 @@ export const aki = [
       'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
+  {
+    // Salidas de build y reportes: no se lintean.
+    ignores: [
+      '**/dist/**',
+      '**/.next/**',
+      '**/.turbo/**',
+      '**/coverage/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
+      '**/next-env.d.ts',
+    ],
+  },
 ];
 
 export default aki;

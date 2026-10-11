@@ -1,0 +1,32 @@
+/*
+ * Tokens AKI — CSS canónico (DESIGN-CONTRACT §§2–5).
+ * Se importa desde apps/web/app/globals.css con `@import '@aki/config/theme.css';`
+ * El test packages/config/src/sync.test.ts lo mantiene sincronizado con tailwind/index.ts.
+ */
+@theme {
+  /* Paleta */
+  --color-aki-bg: #f5f5f5;
+  --color-aki-red: #e80008;
+  --color-aki-orange: #f87800;
+  --color-aki-gold: #f89800;
+  --color-aki-success: #2e7d4f;
+  --color-aki-error: #b3001b;
+
+  /* Tinta (neutros de texto) */
+  --color-aki-ink: #111111;
+  --color-aki-muted: #6b7280;
+  --color-aki-line: #e5e7eb;
+
+  /* Tipografía */
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Breakpoints del contrato (además de los por defecto de Tailwind) */
+  --breakpoint-desktop: 1280px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-mobile: 390px;
+
+  /* Medidas del shell */
+  --width-sidebar: 264px;
+  --height-topbar: 72px;
+}
