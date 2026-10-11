@@ -14,7 +14,11 @@
   },
   "dependencies": {
     "@aki/config": "workspace:*",
-    "@aki/shared": "workspace:*"
+    "@aki/shared": "workspace:*",
+    "@radix-ui/react-dialog": "^1.2.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.54.0",
+    "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

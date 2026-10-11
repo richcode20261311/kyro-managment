@@ -1,4 +1,11 @@
-export { formatCOP, formatDate, formatDuration, formatPercent, formatTime } from './format';
+export {
+  formatCOP,
+  formatDate,
+  formatDateHeader,
+  formatDuration,
+  formatPercent,
+  formatTime,
+} from './format';
 export { isUuid, newId, uuidTimestamp, uuidVersion, type UuidV7 } from './ids';
 export {
   isIdempotencyKey,

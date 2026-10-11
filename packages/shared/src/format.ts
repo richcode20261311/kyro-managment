@@ -70,6 +70,13 @@ export function formatDuration(totalSeconds: number): string {
   return `${sign}${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+/** Encabezados de página (§9): `formatDateHeader(new Date())` → `"Sábado, 10/10/2026"`. */
+export function formatDateHeader(date: Date | number | string): string {
+  const weekday = new Intl.DateTimeFormat('es-CO', { weekday: 'long' }).format(toDate(date));
+  const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  return `${capitalized}, ${formatDate(date)}`;
+}
+
 function toDate(value: Date | number | string): Date {
   return value instanceof Date ? value : new Date(value);
 }

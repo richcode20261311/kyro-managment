@@ -28,5 +28,6 @@
 
   /* Medidas del shell */
   --width-sidebar: 264px;
+  --width-rail: 88px;
   --height-topbar: 72px;
 }

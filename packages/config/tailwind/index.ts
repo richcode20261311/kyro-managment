@@ -30,5 +30,6 @@ export const screens = {
 /** Medidas fijas del shell §4: sidebar 264 px, barra superior 72 px. */
 export const layout = {
   sidebar: '264px',
+  rail: '88px',
   topbar: '72px',
 } as const;
