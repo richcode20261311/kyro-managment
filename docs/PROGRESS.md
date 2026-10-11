@@ -143,7 +143,7 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2. Tokens Tailwind + tipografía (Poppins/Inter locales) | ✅ |
 | 3. `packages/shared` (formateadores, ids, catálogo) | ✅ |
 | 4. `AppShell` F2 (16 ítems, 1280/1024/390, roles) | ✅ |
-| 5. Primitivos `packages/ui` | ⏳ en curso |
+| 5. Primitivos `packages/ui` | ✅ |
 | 6. Estados globales F3 | ⏳ |
 | 7. Hoja de componentes F1 | ⏳ |
 | 8. Pruebas (axe + visual + regresión) | ⏳ |

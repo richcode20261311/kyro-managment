@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { OfflineBanner, ToastProvider } from '@aki/ui';
 import '@fontsource/poppins/400.css';
 import '@fontsource/poppins/500.css';
 import '@fontsource/poppins/600.css';
@@ -19,7 +20,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-CO">
-      <body>{children}</body>
+      <body>
+        <ToastProvider>
+          <OfflineBanner />
+          {children}
+        </ToastProvider>
+      </body>
     </html>
   );
 }
