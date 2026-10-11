@@ -12,10 +12,14 @@
   --color-aki-success: #2e7d4f;
   --color-aki-error: #b3001b;
 
+  /* Tintes oscuros para texto sobre fondos claros (contraste AA) */
+  --color-aki-gold-ink: #8a5b00;
+  --color-aki-orange-ink: #a04e00;
+
   /* Tinta (neutros de texto) */
   --color-aki-ink: #111111;
   --color-aki-muted: #6b7280;
-  --color-aki-line: #e5e7eb;
+  --color-aki-line: #e6e6e6;
 
   /* Tipografía */
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;

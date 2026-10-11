@@ -135,6 +135,20 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2026-10-10 | Orden de fases según docs/PHASES.md | Pantallas sin referencia visual van al final de su fase |
 | 2026-10-10 | Tabla canónica en `docs/STITCH-INVENTORY.md`; versión oficial se elige por cumplimiento del contrato, no por antigüedad | Múltiples duplicados en Stitch |
 
+## Fase 1 — Cimientos (plan en `docs/PLAN-FASE-1.md`, rama `fase-1-cimientos`)
+
+| Tarea | Estado |
+|---|---|
+| 1. Scaffold Turborepo + tooling (tsconfig, eslint, vitest, playwright) | ✅ |
+| 2. Tokens Tailwind + tipografía (Poppins/Inter locales) | ✅ |
+| 3. `packages/shared` (formateadores, ids, catálogo) | ✅ |
+| 4. `AppShell` F2 (16 ítems, 1280/1024/390, roles) | ✅ |
+| 5. Primitivos `packages/ui` | ⏳ en curso |
+| 6. Estados globales F3 | ⏳ |
+| 7. Hoja de componentes F1 | ⏳ |
+| 8. Pruebas (axe + visual + regresión) | ⏳ |
+| 9. Serwist + Dexie | ⏳ |
+
 ## Bloqueos y preguntas abiertas
 
 - **R1–R5 (Reportes)**: Sin referencia visual en Stitch — diseñar desde cero al final de la Fase 9 (referencias: C1, M6, B8, I5, S7)

@@ -12,6 +12,9 @@ export const colors = {
   'aki-gold': '#F89800',
   'aki-success': '#2E7D4F',
   'aki-error': '#B3001B',
+  'aki-line': '#E6E6E6',
+  'aki-gold-ink': '#8A5B00',
+  'aki-orange-ink': '#A04E00',
 } as const;
 
 /** Familias según DESIGN-CONTRACT §3: Poppins para títulos, Inter para cuerpo. */
