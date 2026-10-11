@@ -23,7 +23,11 @@ import { withTenant } from '../prisma.with-tenant';
 import type { AccessTokenPayload, RefreshTokenPayload, RequestMeta } from './token.types';
 
 export const REFRESH_COOKIE = 'aki_refresh';
-export const REFRESH_COOKIE_PATH = '/api/auth';
+/**
+ * Path `/` (no `/api/auth`): el middleware de Next debe ver la cookie en las
+ * peticiones de página (/sede, /panel…) para decidir si hay sesión.
+ */
+export const REFRESH_COOKIE_PATH = '/';
 
 const RECOVERY_TTL_MINUTES = 15;
 const INVALID_CREDENTIALS = 'Correo o contraseña incorrectos';
