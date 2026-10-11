@@ -57,7 +57,7 @@ export function Pagination({ page, pageSize, total, onPageChange, className }: P
             className={cn(
               'grid size-12 place-items-center rounded-xl text-sm font-medium',
               candidate === page
-                ? 'bg-aki-red/8 text-aki-red'
+                ? 'bg-aki-red/8 text-aki-error'
                 : 'text-aki-ink hover:bg-black/5',
             )}
           >

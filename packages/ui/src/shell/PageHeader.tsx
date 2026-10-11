@@ -32,7 +32,7 @@ export function PageHeader({ section, title, chip, actions, filters, now }: Page
             {title}
           </h1>
           {chip && (
-            <span className="shrink-0 rounded-full bg-aki-success/10 px-3 py-1 text-xs font-medium text-aki-success">
+            <span className="shrink-0 rounded-full bg-aki-success/10 px-3 py-1 text-xs font-medium text-aki-success-ink">
               {chip}
             </span>
           )}

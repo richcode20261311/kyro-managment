@@ -55,7 +55,7 @@ export function MoreSheet({ open, onOpenChange, activeItem, role }: MoreSheetPro
                         className={cn(
                           'flex h-12 items-center gap-3 border-l-4 px-4 text-base',
                           isActive
-                            ? 'border-aki-red bg-aki-red/8 font-medium text-aki-red'
+                            ? 'border-aki-red bg-aki-red/8 font-medium text-aki-error'
                             : 'border-transparent text-aki-ink',
                         )}
                       >

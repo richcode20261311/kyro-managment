@@ -15,10 +15,11 @@
   /* Tintes oscuros para texto sobre fondos claros (contraste AA) */
   --color-aki-gold-ink: #8a5b00;
   --color-aki-orange-ink: #a04e00;
+  --color-aki-success-ink: #1f5e3c;
 
   /* Tinta (neutros de texto) */
   --color-aki-ink: #111111;
-  --color-aki-muted: #6b7280;
+  --color-aki-muted: #5c6470;
   --color-aki-line: #e6e6e6;
 
   /* Tipografía */

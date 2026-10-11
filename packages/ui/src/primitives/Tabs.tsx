@@ -32,13 +32,12 @@ export function Tabs({ items, value, onChange, className }: TabsProps) {
             type="button"
             role="tab"
             aria-selected={selected}
-            aria-controls={`${baseId}-${item.id}`}
             id={`${baseId}-tab-${item.id}`}
             onClick={() => onChange(item.id)}
             className={cn(
               'h-12 shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium',
               selected
-                ? 'border-aki-red text-aki-red'
+                ? 'border-aki-red text-aki-error'
                 : 'border-transparent text-aki-muted hover:text-aki-ink',
             )}
           >

@@ -4,7 +4,7 @@ import { cn } from '../cn';
 export type ChipTone = 'success' | 'warning' | 'danger' | 'orange' | 'neutral' | 'outline';
 
 const tones: Record<ChipTone, string> = {
-  success: 'bg-aki-success/10 text-aki-success',
+  success: 'bg-aki-success/10 text-aki-success-ink',
   warning: 'bg-aki-gold/10 text-aki-gold-ink',
   danger: 'bg-aki-error/10 text-aki-error',
   orange: 'bg-aki-orange/10 text-aki-orange-ink',
