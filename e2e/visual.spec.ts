@@ -15,6 +15,9 @@ const maskDate = (page: Page) => [
 ];
 
 test('captura del panel', async ({ page }) => {
+  // Congela el reloj: la fecha real cambia el ancho del texto del encabezado y
+  // la máscara por sí sola no cubre anchos distintos (rompía la captura cada día).
+  await page.clock.install({ time: new Date('2026-10-10T10:00:00-05:00') });
   await stabilize(page);
   await expect(page).toHaveScreenshot('panel.png', {
     mask: maskDate(page),
