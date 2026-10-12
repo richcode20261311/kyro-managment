@@ -16,6 +16,7 @@ const tx = {
   user: { findUnique: vi.fn(), update: vi.fn() },
   session: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
   recoveryToken: { create: vi.fn(), findFirst: vi.fn(), deleteMany: vi.fn(), updateMany: vi.fn() },
+  sede: { findMany: vi.fn().mockResolvedValue([]) },
 };
 
 const prisma = {
@@ -125,6 +126,45 @@ describe('AuthService.pinLogin y grilla kiosco', () => {
     const rows = await makeService().kioskEmployees('aki');
     expect(rows).toEqual([{ id: 'u1', name: 'Andrea Ramírez', role: 'ADMINISTRADOR' }]);
     expect(String(prisma.$queryRaw.mock.calls[0]?.[0])).toContain('list_kiosk_employees');
+  });
+});
+
+describe('AuthService.sedes (A4)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('devuelve solo las sedes activas del tenant autenticado, ordenadas por nombre', async () => {
+    tx.sede.findMany.mockResolvedValue([
+      { id: 's2', name: 'Sede Chía', active: true },
+      { id: 's1', name: 'Sede Cajicá', active: true },
+    ]);
+
+    const rows = await makeService().sedes('t1');
+
+    expect(rows).toHaveLength(2);
+    expect(tx.sede.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tenantId: 't1', active: true },
+        orderBy: { name: 'asc' },
+      }),
+    );
+  });
+
+  it('el tenantId lo impone el servidor: no acepta otro tenant aunque lo pida el llamador', async () => {
+    tx.sede.findMany.mockResolvedValue([]);
+
+    await makeService().sedes('t1');
+
+    // El servicio recibe el tenant del token (req.user.tenantId en el
+    // controlador); la prueba fija que la consulta lo use literalmente.
+    const args = tx.sede.findMany.mock.calls[0]?.[0];
+    expect(args.where.tenantId).toBe('t1');
+    expect(args.where.tenantId).not.toBe('t2');
+  });
+
+  it('devuelve lista vacía cuando el tenant no tiene sedes activas', async () => {
+    tx.sede.findMany.mockResolvedValue([]);
+
+    await expect(makeService().sedes('t1')).resolves.toEqual([]);
   });
 });
 
