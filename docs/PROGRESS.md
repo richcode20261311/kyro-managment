@@ -2,8 +2,8 @@
 
 Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre sesiones: cualquier sesión nueva debe leerlo antes de empezar.
 
-**Última actualización:** 2026-10-11
-**Fase actual:** 2 en curso — tareas 1 (base de datos + RLS), 2 (API de autenticación), 3 (infra frontend de sesión) y 4 (A1 login + A3 recuperar) completadas
+**Última actualización:** 2026-10-12
+**Fase actual:** 2 en curso — tareas 1–5 completadas (base de datos + RLS, API auth, infra sesión, A1/A3 login, A2/A4/A5 PIN/sede/turno); migración multi-tenant preparada sin ejecutar (espera aprobación, ver `docs/MIGRATION-MULTITENANT.md`)
 **Rama:** fase-2-acceso
 
 ## Estado por fase
@@ -179,15 +179,17 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 | 2. API auth (correo, PIN, refresh, recuperación) + guards + auditoría | ✅ |
 | 3. Infra frontend: TanStack Query, cliente HTTP con token, Zustand sesión, middleware de rutas | ✅ |
 | 4. A1 + A3 (login y recuperar) | ✅ |
-| 5. A2 + A4 + A5 (PIN, sede, turno) | ⏳ |
+| 5. A2 + A4 + A5 (PIN, sede, turno) | ✅ |
 | 6. API sedes, turnos/caja, notificaciones, búsqueda global | ⏳ |
 | 7. C1 + C2 + C3 + C4 | ⏳ |
 | 8. Pruebas: flujo completo 3 viewports, axe, visual | ⏳ |
 | 9. Cierre y PROGRESS | ⏳ |
+| M. Migración multi-tenant + onboarding base (archivos, código y **prueba completa en clon**; BD real sin tocar) | ⏸️ Espera aprobación para aplicar en BD real — `docs/MIGRATION-MULTITENANT.md` §16 |
 
 ## Bloqueos y preguntas abiertas
 
-- **Rate limiting del login**: sin límite de intentos en Fase 2;保驾护arlo en la tarea de seguridad de la Fase 10
+- **Migración multi-tenant**: preparada y **validada completa en clon** el 2026-10-11 (respaldo probado → `aki_admin_clone` → `migrate deploy` → seed → pruebas §11 11/11 → e2e 53/0 fallos, registro en `docs/MIGRATION-MULTITENANT.md` §16). **NO aplicada a la BD real**: sobre `aki_admin` no corrió ningún `migrate`, SQL ni seed (verificado al cierre: conteos y `User_email_key` intactos). Falta autorización explícita para §10.4–8 (ventana de mantenimiento, deploy en destino, verificación §12)
+- **Rate limiting del login**: sin límite de intentos en Fase 2; guardarlo en la tarea de seguridad de la Fase 10
 - **R1–R5 (Reportes)**: Sin referencia visual en Stitch — diseñar desde cero al final de la Fase 9 (referencias: C1, M6, B8, I5, S7)
 - **Logo AKI**: Necesario archivo real en `apps/web/public/brand/aki-logo.png` (fondo transparente)
 - **Cotización Factus**: Proveedor DIAN por WhatsApp pendiente
@@ -215,3 +217,72 @@ Actualiza este archivo al iniciar y al cerrar cada tarea. Es la memoria entre se
 - [ ] Confirmar con OVH si el precio del VPS está en USD o COP.
 - [ ] Definir pedidos por día del restaurante para afinar costos.
 - [ ] Verificar el nombre de marca final ante la SIC.
+
+## Log de tareas completadas (Fase 2)
+
+### Tarea 5 — A2 + A4 + A5 (2026-10-11)
+- **A2 `/login/pin`**: Selección de empleado (grid responsive) + teclado PIN accesible (4 indicadores, borrar, confirmar, estados error/bloqueo/éxito, persistencia de bloqueo 30s en localStorage)
+- **A4 `/sede`**: Grid de sedes asignadas con estado (abierta/cerrada/ocupada), selección con Chip, redirección a `/turno/apertura`
+- **A5 `/turno/apertura`**: Wizard 3 pasos con stepper visual
+  - Paso 1: Resumen caja/responsable/sede/fecha
+  - Paso 2: Conteo billetes/monedas con controles +/- 48px, autocompletar base sugerida, totales en tiempo real
+  - Paso 3: Confirmación con resumen detallado, nota opcional, botón "Confirmar y abrir caja", validación de descuadre
+  - Sidebar derecho fijo con resumen, diferencia visual (verde/dorado/rojo), botones de navegación
+  - Mobile: bottom bar con total y acción principal
+  - Modal de éxito con resumen y navegación a `/panel`
+- **Catálogo i18n**: Añadidas claves `auth.pin`, `auth.sede`, `auth.turno` en `packages/shared/src/catalog.ts`
+- **Componentes nuevos**: `PinKeypad`, `PinLoginFlow`, `SedeSelection`, `CashCount`, `ConfirmacionApertura`, `AperturaTurno`
+- **Tests**: Unit tests pasan (vitest), E2E pasan en 3 viewports (desktop-1280, tablet-1024, mobile-390)
+- **Typecheck**: Pasa sin errores
+
+### Migración multi-tenant + A1 selección de restaurante (2026-10-11) — archivos preparados, SIN ejecutar
+
+- **Alcance ejecutado**: solo inspección, diseño y archivos de código. **No** corrió `prisma migrate deploy/dev`, SQL, seed ni ninguna operación sobre bases de datos; tampoco `pnpm e2e` (su webServer levanta la API contra la BD real).
+- **Esquema**: `schema.prisma` con 5 enums, campos opcionales en `Tenant`/`Sede`, `User` con `@@unique([tenantId, email])` (cae el único global) y 6 tablas nuevas (`TenantBranding`, `TenantFiscalProfile`, `TenantDocument`, `InvoicingResolution`, `OnboardingProgress`, `ConsentRecord`). Se corrigió el conteo erróneo de «9 tablas» (mezclaba enums).
+- **Migración**: `prisma/migrations/20261012000000_multi_tenant_onboarding/migration.sql` — sección Prisma generada offline con `prisma migrate diff` (solo lectura) y verificada sentencia a sentencia; guarda de duplicados `(tenantId, email)` antes de tocar índices; RLS de las 6 tablas nuevas (incluido `ConsentRecord` vía usuario); **único** ajuste de datos: `status=ACTIVO`/`plan=EMPRESARIAL` en AKI con guards que no pisan valores ya definidos; sin NIT/razón social/datos fiscales inventados y sin perfiles `VERIFICADO`.
+- **Funciones SQL**: `resolve_login_identity` ahora retorna 4 columnas (slug/nombre) y filtra `status IN ('PRUEBA','ACTIVO')` (DROP+CREATE+re-GRANT); `resolve_user_identity` y `list_kiosk_employees` solo ganan ese filtro. Firmas idénticas → consumidores (`auth.service.ts`) compatibles.
+- **A1 multi-tenant sin fugas**: sin endpoint público de correos→restaurantes; la lista sale solo cuando la contraseña cuadró en esos tenants; `POST /auth/login/select` valida token firmado (5 min) + `tenantId` perteneciente a los tenants verificados; guard endurecido para que el token de selección no sirva como access/refresh.
+- **A2/A3**: PIN sin cambios; recuperación envía un código por cuenta y actúa solo sobre la cuenta cuyo código valide.
+- **Pantalla nueva**: `/login/seleccionar` (solo aparece cuando el servidor la exige; reto en memoria de pestaña, sin localStorage). A1–A5 existentes intactos.
+- **Gates reales**: `pnpm typecheck` ✅, `pnpm lint` ✅, `pnpm test` ✅ (106 pruebas), `prisma validate/generate` ✅.
+- **Pendiente**: aplicar la migración y correr las pruebas de BD clonada (§10–§11 de `docs/MIGRATION-MULTITENANT.md`) — espera autorización.
+
+### Validación en clon de la migración multi-tenant (2026-10-11) — ejecutada con autorización condicionada; BD real intacta
+
+Continúa la entrada anterior. Registro completo en `docs/MIGRATION-MULTITENANT.md` §16.
+
+- **Alcance ejecutado**: §10.1–3 sobre `aki_admin_clone` (OID 21359): respaldo → restauración probada → `prisma migrate deploy` → `db seed` (×2) → pruebas §11 y `pnpm e2e` **solo contra el clon**. Prohibiciones respetadas: ni `migrate deploy`, ni seed, ni escrituras, ni `migrate resolve` sobre `aki_admin`; sin integraciones externas y sin cambios de pantallas/identidad visual.
+- **Respaldo**: `~/.aki-backups/…_premultitenant_pg16.dump` (herramientas v16 del contenedor, 107 objetos) restaurado con `--exit-on-error` y verificado: tablas, índices, restricciones, conteos y huellas md5 idénticos al origen. Descartado el dump del host (PG18) por `SET transaction_timeout` incompatible con PG16 (error documentado).
+- **Migración en clon**: aplicada (5/5 en `_prisma_migrations`); `User_email_key` → `User_tenantId_email_key`; 6 tablas nuevas en 0 filas; AKI `ACTIVO`/`EMPRESARIAL`, `trialEndsAt`/`legalName`/`taxId` en NULL; 5 enums creados; `resolve_login_identity` con 4 columnas y `SECURITY DEFINER`; EXECUTE solo para `aki`/`aki_app` (PUBLIC revocado); RLS `enabled+force` con sus 6 políticas.
+- **Pruebas §11: 11/11 aprobadas, 0 fallidas** — A1 (directo, 401 genérico, anti-enumeración `tenants-by-email` → 404), A2 (lista kiosco + PIN 1111), A3 (202→verify→reset→login nueva, vieja → 401, credenciales restauradas), correo en 2 tenants (reto con 2 opciones, `select` dentro → 200, fuera → 401, coincidencia única → directo), RLS negativa (6 tablas nuevas + `User`/`Session`: 0 sin contexto, A no ve B, cruces → error/0, positivos OK), 11 pruebas de tokens (manipulados/expirados/propósito incorrecto → 401; **sesión pre-migración → 200 rotada**; sesión revocada → 401), semilla idempotente sin sobrescribir ni inventar datos fiscales.
+- **Regresión**: `pnpm e2e` → **53 pasaron / 16 omitidos / 0 fallaron** (A1/A2/A3, shell, visual, a11y, PWA; `dev-sheet` verde); `pnpm test` → **109/109**.
+- **Errores**: solo de entorno y de mis guiones (PG18 vs PG16, `createdb` con URI, PID del logger contado como código, `SET app.tenant_id` olvidado) — todos corregidos y re-ejecutados; **ningún fallo del producto**.
+- **Estado al cierre**: API dev restaurada en :3001 sobre `aki_admin` (`.env` sin modificar); origen verificado intacto (conteos originales, `User_email_key` presente, migración pendiente); en el clon queda documentado el fixture `clon-pruebas` (tenant de pruebas desechable con correo compartido que **no** coincide con `Admin1234!`, para no alterar A1/e2e).
+- **Pendiente**: aplicar la migración en la **BD real** (§10.4–8: ventana de mantenimiento, deploy, código nuevo, verificación §12) — espera aprobación explícita posterior.
+
+### Revisión final previa a producción (2026-10-11) — solo lectura, sin ejecutar la migración real
+
+- **Auditoría del registro**: `docs/MIGRATION-MULTITENANT.md` §10–§16 ampliados con datos verificables: respaldo operativo (`aki_admin_20261011_173520_…_pg16.dump`, 48 873 bytes, sha256 `9bd0eb5d…`, restaurado y verificado) vs artefacto PG18 no restaurable en PG16; §16.7 con los comandos ejecutados sanitizados; aclaración de omitidos (16 saltos por condición, no fallos) vs pendientes (solo la aplicación real); conteo unitario final109 (§14 registró106 en su etapa).
+- **Procedimiento de producción (§17, NO ejecutado)**: secuencia detener → respaldo final+restore probado → migración → puerta §12 → desplegar código → humo → observar; controles para que el código viejo no opere contra el esquema nuevo y el nuevo no arranque antes del esquema; criterios de éxito/parada y matriz de recuperación por momento de fallo. Hallazgo: **no hay runbook de despliegue en el repo** (medio real en el VPS por confirmar).
+- **Seguridad (§18)**: confirmada ausencia total de rate limiting; PIN bloqueado solo en `localStorage`; código A3 sin contador de intentos ni consumo al fallar y generado con `Math.random`; `recovery/request` permite invalidar códigos y disparar envíos. **Mitigaciones mínimas documentadas como requisito previo al registro público (O1–O8)**, adelantando el hito de la Fase 10. Comportamiento durante el cambio confirmado: `sid` existía desde Fase 1 (`0f84a7f`) → tokens vigentes sobreviven; `RecoveryToken` idéntico al HEAD; RLS/`SECURITY DEFINER` sin cambios en lo previo (probados en clon).
+- **Recuperación (§18.3)**: solo se garantiza full-restore en este servidor con el dump operativo; sin PITR, sin prueba en servidor fresco, RTO sin medir, restore del respaldo final pendiente hasta la ventana.
+- **Límites respetados**: cero escrituras en `aki_admin` (solo `SELECT`, `pg_dump` y `migrate status`), cero despliegues, cero cambios de código; cambios únicamente documentales (§15–§18 de `MIGRATION-MULTITENANT.md` y esta entrada).
+
+### Endurecimiento A1–A3, arreglo del filtro429 y verificación completa (2026-10-12)
+
+- **Causa raíz del defecto que rompía la batería**: `RateLimitExceptionFilter` no llevaba `@Catch()`; Nest enrutaba **todas** las excepciones por ese filtro global y reescribía cada400/401 como429 con `Retry-After: undefined` (evidencia pre-fix:33 respuestas falsas vs8 reales). Arreglo: `@Catch(RateLimitException)` + regresión `apps/api/src/common/rate-limit-filter.test.ts` (rojo→verde demostrado) + `apps/api/vitest.config.mts` (`oxc.decorator.legacy`).
+- **Limitadores A1–A3 en código** (`apps/api/src/common/rate-limit.ts`): ventanas deslizantes configurables por entorno (`RATE_LIMIT_<CLAVE>_{MAX,WINDOW,BLOCK}`, defaults en `.env.example`), IP del socket (no de cabeceras manipulables), bloqueos temporales,429 solo con `Retry-After`; A3 con CSPRNG, código vinculado a identidad+finalidad, consumo atómico y cooldown. Detalle en `docs/MIGRATION-MULTITENANT.md` §18.4 y runbook en `docs/OPERATIONS.md` (nuevo).
+- **Batería HTTP:36 comprobaciones contra el clon (:3002) → 36/36 en dos corridas consecutivas** desde estados sucios (determinista entre ejecuciones). Cobertura: A1/A2/A3 completos, multi-tenant (reto, select, límites), refresh (rotación+revocación), higiene de logs/buzón e integridad de BD real y :3001.
+- **Ajustes del harness (solo aislamiento; ningún control reducido)**: identidad distinta por escenario; limpieza de tokens sin usar **por correo del escenario** (el cooldown del emisor secuestraba escenarios); P0 «pizarra limpia» (hash inválido + un solo ciclo A3) para el email compartido entre tenants; prep MT que iguala la contraseña de los dos admins **vía la propia API** para poder emitir el reto de2; víctimas cuya contraseña no altera ningún escenario (evita dependencias entre corridas); `wait` acotado a los PID de curl (un `wait` libre colgaba la batería esperando al proceso de la API); `--max-time` en todos los curl.
+- **Gates**: `pnpm typecheck` ✅ · `pnpm lint` ✅ · `pnpm test` ✅ **133** (api59, web27, ui23, shared24). BD real intacta: `aki_admin` OID16384 con4 migraciones, `RecoveryToken` 1→1 antes/después; clon OID21359 con la migración multi-tenant (5).
+- **Entorno**: el equipo se reinició el 12/10 07:14 (borró `/tmp/opencode` — batería, logs y salidas de las corridas1–2 — y mató los servidores dev); se reconstruyó el entorno de pruebas (contenedor Postgres, dist aislado, entorno y batería). `:3001` quedó sin servidor dev (0 listeners antes y después; la batería no lo toca).
+- **Pendiente/decisiones**: migración multi-tenant en la **BD real** (§17.1, espera autorización explícita); commit del trabajo de la rama (endurecimiento + fix + docs); versionar o no el harness de batería; Redis local con `requirepass` o acotado a localhost.
+
+### Cierre técnico: batería versionada, filtro revisado y Redis (2026-10-12)
+
+- **Batería versionada** en `apps/api/test/security/` (`battery.sh`, `launch-clone-api.js`, `clone.env.example`, `README.md`; atajo `pnpm run test:security`). Su preflight añade **tres puertas que abortan (`exit 90`) antes de la primera petición HTTP** si la configuración efectiva no demuestra uso exclusivo de `aki_admin_clone`: fichero sin claves duplicadas con URL exactas y `PORT=3002`; **sonda TCP con las credenciales propias de cada URL** exigiendo `current_database()=aki_admin_clone` con su `oid` en el servidor (el nombre escrito en el fichero no basta); `oid` de clon y BD real distintos con el fixture intacto. Demostración real de la puerta: un entorno mal generado fue **rechazado sin llegar a HTTP**. Corrida con el script del repo → **37/37**; limitaciones documentadas en el README (no prueba por sí sola que un cambio futuro del código ignore el entorno forzado: eso lo cubren la evidencia en cada arranque, la integridad final y el flujo P0, que cambia contraseñas en el clon y las verifica por HTTP). El entorno real y los artefactos siguen **fuera** del repo (`AKI_BATTERY_DIR`).
+- **Revisión del filtro (B)**: regresión ampliada a4 comprobaciones —400/401 conservan código y cuerpo **sin** `Retry-After`; solo `RateLimitException` produce429 (cuerpo exacto `statusCode`+`message`, sin clave de límite ni ventana); un `Error` inesperado cae a500 genérico **sin** convertirse en429 ni filtrar el detalle. Decisión/efecto documentado: el filtro global atiende únicamente al limitador y todo lo demás vuelve al manejo por defecto de Nest (era el bug pre-fix).
+- **Redis (C, sin actuar)**: el compose publica `6379:6379`, que binda a **todas** las interfaces cuando el contenedor corre (no está protegido por estar en Docker); estado verificado hoy: contenedor `aki-redis` **detenido** y sin listener; **ningún servicio lo necesita** (la API no usa Redis). Propuesta mínima segura en `docs/OPERATIONS.md` (loopback o red privada + secreto fuera del repo con `${REDIS_PASSWORD:?…}` o ACL) **sin aplicar ni reiniciar nada**. Nueva sección «Datos del VPS que debe confirmar el operador»: este entorno no tiene acceso ni evidencias del VPS.
+- **Commits (D)**:4 convencionales en `fase-2-acceso`, sin push — `f7927cf` limitador+filtro · `aa514a5` endurecimiento A1–A3 con su base multi-tenant · `a59e908` batería de seguridad · G4 documentación. **Fuera** por ajenos y sin descartar: pantallas `pin`/`sede`/`turno`, `PinKeypad`/`PinLoginFlow`/`SedeSelection`, `components/turno/`, re-export de `@aki/ui` y las claves i18n `pin`/`sede`/`turno` del catálogo (hunk separado, working tree intacto).
+- **Gates (E, sobre el árbol final)**: `pnpm typecheck` ✅ **6/6** · `pnpm lint` ✅ **5/5** · `pnpm test` ✅ **137** (api60 —10 limitador +4 filtro—, web27, ui23, shared24, config3) · batería **37/37** en el entorno aislado con el script del repo. BD real intacta (solo lectura: `RecoveryToken` 1→1, `aki_admin` OID16384); `:3001` sin tocar; `:3002` detenida al cierre.
+- **Residual/decisiones**: migración multi-tenant en la **BD real** → requiere autorización explícita e independiente (§17.1); aplicación de la propuesta de Redis → decisión humana; registro público O1–O8 sigue bloqueado hasta la validación formal de este endurecimiento.

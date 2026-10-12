@@ -17,6 +17,7 @@ Orden de construcción por fases. Cada fase es una **vertical**: pantallas, esqu
 | 8 | W1 a W8, V1 a V5 | Clientes con consentimiento, webhook de WhatsApp Cloud API, bot con entrega a humano, pedido detectado, reservas y página pública |
 | 9 | E1 a E6, R1 a R5, S1 a S8, X1, X2 | Personal y turnos, reportes agregados, configuración, impresoras (ESC/POS), copias de seguridad, vistas móviles por rol |
 | 10 | Transversal | PWA sin conexión (cola con claves de idempotencia), pasarela Wompi con verificación de firma, endurecimiento de seguridad, despliegue |
+| O | **Onboarding SaaS: registro público O1 a O8** (fase funcional independiente, ver `docs/ONBOARDING.md`; páginas públicas sin shell de AKI Admin) | Alta de restaurantes con correo verificado, datos comerciales y fiscales opcionales, sedes y usuarios, progreso de registro y consentimientos. Sus modelos base ya existen desde la migración multi-tenant (`docs/MIGRATION-MULTITENANT.md`); pantallas y flujos propios, sin tocar las pantallas operativas |
 
 ## Definición de terminado (aplica a cada pantalla)
 
