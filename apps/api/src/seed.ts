@@ -106,10 +106,21 @@ async function main(): Promise<void> {
   if (!connectionString) throw new Error('Falta DATABASE_URL en el entorno');
   const prisma = createPrisma(connectionString);
 
+  // AKI Cocina Oriental es el restaurante ya operativo (es el que reemplaza a
+  // Fudo): status ACTIVO porque las funciones de login solo autorizan tenants
+  // en PRUEBA/ACTIVO, y plan EMPRESARIAL porque no es una cuenta en prueba.
+  // trialEndsAt queda sin definir y no se crean datos fiscales inventados
+  // (los perfiles de marca/fiscal nacen vacíos hasta que sus formularios
+  // guarden información real). Seed de desarrollo, idempotente.
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'aki' },
-    update: { name: 'AKI Cocina Oriental' },
-    create: { name: 'AKI Cocina Oriental', slug: 'aki' },
+    update: { name: 'AKI Cocina Oriental', status: 'ACTIVO', plan: 'EMPRESARIAL' },
+    create: {
+      name: 'AKI Cocina Oriental',
+      slug: 'aki',
+      status: 'ACTIVO',
+      plan: 'EMPRESARIAL',
+    },
   });
 
   for (const sede of SEDES) {
@@ -122,7 +133,7 @@ async function main(): Promise<void> {
 
   for (const dev of DEV_USERS) {
     await prisma.user.upsert({
-      where: { email: dev.email },
+      where: { tenantId_email: { tenantId: tenant.id, email: dev.email } },
       update: { name: dev.name, role: dev.role, active: true },
       create: {
         tenantId: tenant.id,

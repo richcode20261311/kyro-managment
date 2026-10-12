@@ -9,7 +9,7 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import type { KioskQuery, LoginInput, PinLoginInput } from '@aki/shared';
+import type { KioskQuery, LoginInput, PinLoginInput, TenantSelectionChallenge } from '@aki/shared';
 import {
   kioskQuerySchema,
   loginSchema,
@@ -17,9 +17,11 @@ import {
   recoveryRequestSchema,
   recoveryResetSchema,
   recoveryVerifySchema,
+  tenantSelectSchema,
   type RecoveryRequestInput,
   type RecoveryResetInput,
   type RecoveryVerifyInput,
+  type TenantSelectInput,
 } from '@aki/shared';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { AuthService, REFRESH_COOKIE, REFRESH_COOKIE_PATH, type IssuedSession } from './auth.service';
@@ -49,14 +51,37 @@ function toBody(session: IssuedSession): Omit<IssuedSession, 'refreshToken' | 'r
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  /**
+   * A1. Si el correo+contraseña corresponde a un solo restaurante, crea la
+   * sesión como siempre. Si corresponde a varios, responde con el reto de
+   * selección (sin cookie) y el cliente continúa en `login/select`.
+   */
   @Post('login')
   @HttpCode(200)
   async login(
     @Body(new ZodValidationPipe(loginSchema)) input: LoginInput,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+  ): Promise<Omit<IssuedSession, 'refreshToken' | 'refreshMaxAgeMs'> | TenantSelectionChallenge> {
+    const result = await this.auth.login(input, metaOf(req));
+    if ('requiresTenantSelection' in result) return result;
+    setRefreshCookie(res, result.refreshToken, result.refreshMaxAgeMs);
+    return toBody(result);
+  }
+
+  /**
+   * Segundo paso de A1 solo cuando hubo selección: el token atestigua la
+   * contraseña verificada y el servidor valida que el tenant elegido esté
+   * entre los permitidos antes de abrir la sesión.
+   */
+  @Post('login/select')
+  @HttpCode(200)
+  async loginSelect(
+    @Body(new ZodValidationPipe(tenantSelectSchema)) input: TenantSelectInput,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<Omit<IssuedSession, 'refreshToken' | 'refreshMaxAgeMs'>> {
-    const session = await this.auth.login(input, metaOf(req));
+    const session = await this.auth.loginSelect(input, metaOf(req));
     setRefreshCookie(res, session.refreshToken, session.refreshMaxAgeMs);
     return toBody(session);
   }
@@ -114,8 +139,9 @@ export class AuthController {
   @HttpCode(200)
   async recoveryVerify(
     @Body(new ZodValidationPipe(recoveryVerifySchema)) input: RecoveryVerifyInput,
+    @Req() req: Request,
   ): Promise<{ ok: true }> {
-    await this.auth.verifyRecovery(input);
+    await this.auth.verifyRecovery(input, metaOf(req));
     return { ok: true };
   }
 

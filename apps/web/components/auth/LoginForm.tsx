@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { loginSchema, t, type LoginInput } from '@aki/shared';
+import { isTenantSelection, loginSchema, t, type LoginInput } from '@aki/shared';
 import { Button, Checkbox, FormField, Tabs } from '@aki/ui';
 import { login } from '../../lib/api/auth';
 import { ApiError } from '../../lib/api/client';
 import { setKeepSession } from '../../lib/auth/keep-session';
+import { setPendingTenantSelection } from '../../lib/auth/tenant-selection';
 import { AuthError } from './AuthError';
 import { IconInput, PasswordInput } from './inputs';
 
@@ -35,7 +36,16 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      await login(values);
+      const resultado = await login(values);
+      // El correo pertenece a varios restaurantes: la contraseña ya se
+      // verificó en el servidor y ahora toca elegir (A1 multi-tenant).
+      if (isTenantSelection(resultado)) {
+        setPendingTenantSelection(resultado);
+        const sigue = new URLSearchParams(window.location.search).get('sigue');
+        const destino = sigue?.startsWith('/') ? `?sigue=${encodeURIComponent(sigue)}` : '';
+        router.push(`/login/seleccionar${destino}` as Route);
+        return;
+      }
       setKeepSession(keep);
       // El middleware guardó a dónde ibas en ?sigue=; el flujo entra por /sede.
       const sigue = new URLSearchParams(window.location.search).get('sigue');

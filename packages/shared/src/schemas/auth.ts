@@ -17,6 +17,32 @@ export interface KioskEmployee {
   role: DbRole;
 }
 
+/** Restaurante (tenant) entre los que un correo puede elegir. */
+export interface TenantOption {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+/**
+ * Respuesta de `POST /auth/login` cuando el correo y la contraseña son válidos
+ * en más de un restaurante: el servidor recién revela la lista después de
+ * verificar la contraseña (no existe endpoint público que asocie correos con
+ * restaurantes) y acompaña un token firmado de corta vida para elegir.
+ */
+export interface TenantSelectionChallenge {
+  requiresTenantSelection: true;
+  tenants: TenantOption[];
+  selectionToken: string;
+}
+
+/** Resultado de A1: sesión directa o reto de selección de restaurante. */
+export type LoginResult = AuthResponse | TenantSelectionChallenge;
+
+export function isTenantSelection(result: LoginResult): result is TenantSelectionChallenge {
+  return (result as TenantSelectionChallenge).requiresTenantSelection === true;
+}
+
 export const emailSchema = z.string().trim().toLowerCase().email('Correo inválido');
 
 export const passwordSchema = z
@@ -30,6 +56,17 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Ingresa tu contraseña'),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/**
+ * Elección de restaurante tras el reto de A1. El servidor valida que el token
+ * sea suyo (firma + caducidad) y que `tenantId` pertenezca a los tenants
+ * verificados en ese token: nunca se confía en el id enviado por el cliente.
+ */
+export const tenantSelectSchema = z.object({
+  selectionToken: z.string().min(1, 'Falta la sesión de selección'),
+  tenantId: z.string().uuid('Restaurante inválido'),
+});
+export type TenantSelectInput = z.infer<typeof tenantSelectSchema>;
 
 export const pinSchema = z.string().regex(/^\d{4,6}$/, 'El PIN debe tener de 4 a 6 dígitos');
 

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isTenantSelection,
   loginSchema,
   passwordSchema,
   pinLoginSchema,
   recoveryResetSchema,
   recoveryVerifySchema,
+  tenantSelectSchema,
+  type LoginResult,
 } from './auth';
 
 describe('esquemas de autenticación', () => {
@@ -39,5 +42,22 @@ describe('esquemas de autenticación', () => {
     const reset = recoveryResetSchema.safeParse({ ...base, newPassword: 'Nueva1234' });
     expect(reset.success).toBe(true);
     expect(recoveryResetSchema.safeParse({ ...base, newPassword: 'débil' }).success).toBe(false);
+  });
+
+  it('selección de restaurante: token obligatorio y tenant con uuid válido', () => {
+    const tenantId = '48103d91-bfb2-4e4a-9f16-061cdebc40fe';
+    expect(tenantSelectSchema.safeParse({ selectionToken: 'tok', tenantId }).success).toBe(true);
+    expect(tenantSelectSchema.safeParse({ selectionToken: '', tenantId }).success).toBe(false);
+    expect(tenantSelectSchema.safeParse({ selectionToken: 'tok', tenantId: 'no-uuid' }).success).toBe(
+      false,
+    );
+    expect(tenantSelectSchema.safeParse({ selectionToken: 'tok' }).success).toBe(false);
+  });
+
+  it('isTenantSelection distingue la sesión directa del reto', () => {
+    expect(isTenantSelection({ accessToken: 'x' } as LoginResult)).toBe(false);
+    expect(
+      isTenantSelection({ requiresTenantSelection: true, tenants: [], selectionToken: 'tok' }),
+    ).toBe(true);
   });
 });

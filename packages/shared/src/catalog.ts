@@ -36,7 +36,7 @@ export const t = {
   auth: {
     brand: {
       chip: 'Admin',
-      tagline: 'Plataforma de gestión integrada de restaurantes',
+      tagline: 'Plataforma de gestión integrada para restaurantes',
       location: 'Cajicá, Colombia',
       footer: 'Acceso seguro de administración operativa',
     },
@@ -54,6 +54,18 @@ export const t = {
       forgot: '¿Olvidaste tu contraseña?',
       submit: 'Ingresar',
       copyright: (year: number) => `© ${year} AKI Cocina Oriental`,
+    },
+    tenant: {
+      eyebrow: 'Acceso · Restaurante',
+      title: 'Elige tu restaurante',
+      body: 'Tu correo está vinculado a más de un restaurante. Selecciona con cuál quieres entrar.',
+      listLabel: 'Restaurantes disponibles',
+      select: 'Entrar',
+      back: 'Volver a iniciar sesión',
+      loading: 'Ingresando…',
+      expired: 'Esta selección venció. Vuelve a iniciar sesión con tu contraseña.',
+      missing: 'Tu correo no está vinculado a ningún restaurante activo.',
+      error: 'No pudimos abrir la sesión en ese restaurante. Intenta de nuevo.',
     },
     recovery: {
       eyebrow: 'Acceso · Credenciales',

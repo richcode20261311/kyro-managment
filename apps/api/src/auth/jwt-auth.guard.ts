@@ -20,9 +20,15 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Falta el token de acceso');
     }
     try {
-      request.user = await this.jwt.verifyAsync<AccessTokenPayload>(header.slice(7), {
+      const payload = await this.jwt.verifyAsync<AccessTokenPayload>(header.slice(7), {
         secret: process.env['JWT_ACCESS_SECRET'],
       });
+      // Exige los campos de una sesión real: descarta tokens firmados con
+      // otra finalidad (p. ej. el reto de selección de restaurante).
+      if (!payload.sub || !payload.tenantId || !payload.sid || !payload.role) {
+        throw new Error('payload de acceso incompleto');
+      }
+      request.user = payload;
     } catch {
       throw new UnauthorizedException('Sesión expirada, inicia de nuevo');
     }

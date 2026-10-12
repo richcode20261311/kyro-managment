@@ -19,6 +19,9 @@ test-results/
 blob-report/
 playwright/.cache/
 
+# Buzón de desarrollo (códigos de recuperación en local; nunca en repo)
+.aki-mailbox/
+
 # Editores y SO
 .DS_Store
 .idea/

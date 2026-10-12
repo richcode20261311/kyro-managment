@@ -1,4 +1,4 @@
-// Schema multi-tenant de AKI Admin (Fase 2).
+// Schema multi-tenant de AKI Admin (Fase 2 + Onboarding).
 // Reglas: tenant_id en todas las tablas de negocio + RLS en PostgreSQL (ver migración 0002).
 // Dinero COP: enteros (Decimal sin decimales). IDs base: uuid del servidor;
 // IDs de negocio (pedidos, líneas) los genera el cliente con UUIDv7.
@@ -36,30 +36,86 @@ enum NotificationKind {
   DANGER
 }
 
-model Tenant {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum TenantStatus {
+  PENDIENTE_CORREO
+  PENDIENTE_APROBACION
+  PRUEBA
+  ACTIVO
+  SUSPENDIDO
+  CANCELADO
+}
 
-  sedes         Sede[]
-  users         User[]
-  permissions   Permission[]
-  sessions      Session[]
-  shifts        Shift[]
-  notifications Notification[]
-  auditLogs     AuditLog[]
+enum Plan {
+  TRIAL
+  BASICO
+  PROFESIONAL
+  EMPRESARIAL
+}
+
+enum FiscalVerificationStatus {
+  SIN_DATOS
+  EN_REVISION
+  VERIFICADO
+  RECHAZADO
+}
+
+enum DocumentType {
+  RUT
+  OTRO
+}
+
+enum DocumentStatus {
+  SUBIDO
+  EN_REVISION
+  APROBADO
+  RECHAZADO
+}
+
+model Tenant {
+  id              String       @id @default(uuid())
+  name            String       // nombre comercial
+  slug            String       @unique
+  legalName       String?      // razón social
+  businessType    String?      // Restaurante, Cafetería, etc.
+  taxIdType       String?      // NIT
+  taxId           String?      // NIT sin puntos/guiones
+  taxIdDv         String?      // dígito verificación
+  personType      String?      // NATURAL, JURIDICA
+  status          TenantStatus @default(PENDIENTE_CORREO)
+  plan            Plan         @default(TRIAL)
+  trialEndsAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  sedes                     Sede[]
+  users                     User[]
+  permissions               Permission[]
+  sessions                  Session[]
+  shifts                    Shift[]
+  notifications             Notification[]
+  auditLogs                 AuditLog[]
+  branding                  TenantBranding?
+  fiscalProfile             TenantFiscalProfile?
+  documents                 TenantDocument[]
+  invoicingResolutions      InvoicingResolution[]
+  onboardingProgress        OnboardingProgress?
 }
 
 model Sede {
-  id        String   @id @default(uuid())
-  tenantId  String
-  name      String
-  address   String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  tenantId         String
+  name             String
+  address          String?
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  municipalityCode String?
+  departmentCode   String?
+  neighborhood     String?
+  phone            String?
+  hours            Json?
+  services         String[] @default(["SALON", "PARA_LLEVAR", "DOMICILIOS"])
+  tablesCount      Int?
 
   tenant Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   users  UserSede[]
@@ -72,9 +128,7 @@ model Sede {
 model User {
   id           String   @id @default(uuid())
   tenantId     String
-  // Correo único GLOBAL (no por tenant): el login no tiene contexto de tenant
-  // y A1 solo pide correo + contraseña. Decisión registrada en PROGRESS.md.
-  email        String   @unique
+  email        String
   passwordHash String?
   pin          String?
   name         String
@@ -83,15 +137,17 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sedes           UserSede[]
-  sessions        Session[]
-  shiftsOpened    Shift[]        @relation("ShiftOpener")
-  shiftsClosed    Shift[]        @relation("ShiftCloser")
-  notifications   Notification[]
-  auditLogs       AuditLog[]
-  recoveryTokens  RecoveryToken[]
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sedes        UserSede[]
+  sessions     Session[]
+  shiftsOpened Shift[]        @relation("ShiftOpener")
+  shiftsClosed Shift[]        @relation("ShiftCloser")
+  notifications Notification[]
+  auditLogs    AuditLog[]
+  recoveryTokens RecoveryToken[]
+  consents     ConsentRecord[]
 
+  @@unique([tenantId, email])
   @@index([tenantId, role])
 }
 
@@ -103,6 +159,90 @@ model UserSede {
   sede Sede @relation(fields: [sedeId], references: [id], onDelete: Cascade)
 
   @@id([userId, sedeId])
+}
+
+model TenantBranding {
+  tenantId      String   @id
+  logoKey       String?
+  accentColor   String?
+  website       String?
+  socialMedia   Json?
+  hasTrademark  Boolean  @default(false)
+  trademarkName String?
+  trademarkNumber String?
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model TenantFiscalProfile {
+  tenantId              String   @id
+  personType            String?   // NATURAL, JURIDICA
+  taxRegime             String?   // RESPONSABLE_IVA, NO_RESPONSABLE_IVA, SIMPLE
+  taxResponsibilities   String[]  @default([])
+  ciiuCode              String?
+  incEnabled            Boolean   @default(true)
+  incRate               Decimal   @default(8) @db.Decimal(5,2)
+  fiscalAddress         String?
+  fiscalEmail           String?
+  legalRepName          String?
+  legalRepDocType       String?   // CC, CE, PASAPORTE, NIT
+  legalRepDocNumber     String?
+  mercantileRegistry    String?
+  verificationStatus    FiscalVerificationStatus @default(SIN_DATOS)
+  verificationNote      String?
+  provider              String?
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model TenantDocument {
+  id          String   @id @default(uuid())
+  tenantId    String
+  type        DocumentType
+  storageKey  String
+  status      DocumentStatus @default(SUBIDO)
+  reviewerId  String?
+  rejectReason String?
+  createdAt   DateTime @default(now())
+  reviewedAt  DateTime?
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, type])
+}
+
+model InvoicingResolution {
+  id        String   @id @default(uuid())
+  tenantId  String
+  number    String
+  date      DateTime
+  prefix    String
+  rangeStart Int
+  rangeEnd   Int
+  validUntil DateTime
+  environment String   // TEST, PRODUCTION
+  provider  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, number])
+}
+
+model OnboardingProgress {
+  tenantId       String   @id
+  completedSteps String[] @default([])
+  percentage     Int      @default(0)
+  pendingFields  Json?
+  updatedAt      DateTime @updatedAt
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model ConsentRecord {
+  id          String   @id @default(uuid())
+  userId      String
+  document    String
+  version     String
+  ip          String
+  acceptedAt  DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, document])
 }
 
 /// Permisos por rol y acción (PHASES.md). Sembrados en el seed; ajustables por tenant.

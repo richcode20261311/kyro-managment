@@ -85,4 +85,30 @@ describe('A1 — LoginForm', () => {
     await waitFor(() => expect(push).toHaveBeenCalled());
     expect(localStorage.getItem('aki:mantener-sesion')).toBe('0');
   });
+
+  it('correo en varios restaurantes: guarda el reto y pasa a /login/seleccionar', async () => {
+    login.mockResolvedValue({
+      requiresTenantSelection: true,
+      tenants: [{ id: 't1', name: 'AKI Cocina Oriental', slug: 'aki' }],
+      selectionToken: 'tok',
+    });
+    render(<LoginForm />);
+    fillAndSubmit();
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/login/seleccionar'));
+    expect(localStorage.getItem('aki:mantener-sesion')).toBeNull();
+  });
+
+  it('con ?sigue= el reto conserva el destino pendiente', async () => {
+    login.mockResolvedValue({
+      requiresTenantSelection: true,
+      tenants: [{ id: 't1', name: 'AKI Cocina Oriental', slug: 'aki' }],
+      selectionToken: 'tok',
+    });
+    window.history.replaceState(null, '', '/login?sigue=%2Fpanel');
+    render(<LoginForm />);
+    fillAndSubmit();
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/login/seleccionar?sigue=%2Fpanel'));
+  });
 });

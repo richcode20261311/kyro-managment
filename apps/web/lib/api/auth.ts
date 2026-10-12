@@ -2,15 +2,32 @@ import type {
   AuthResponse,
   KioskEmployee,
   LoginInput,
+  LoginResult,
   PinLoginInput,
+  TenantSelectInput,
 } from '@aki/shared';
+import { isTenantSelection } from '@aki/shared';
 import { useSession } from '../auth/session';
 import { api, refreshSession } from './client';
 
 /** Endpoints de autenticación (A1 a A3). El refresh va en cookie httpOnly. */
 
-export async function login(input: LoginInput): Promise<AuthResponse> {
-  const response = await api.post<AuthResponse>('/auth/login', input);
+/**
+ * A1: si el correo pertenece a un solo restaurante devuelve la sesión; si
+ * pertenece a varios, devuelve el reto de selección (sin sesión todavía) y el
+ * llamador continúa en `/login/seleccionar`.
+ */
+export async function login(input: LoginInput): Promise<LoginResult> {
+  const response = await api.post<LoginResult>('/auth/login', input);
+  if (!isTenantSelection(response)) {
+    useSession.getState().setSession(response);
+  }
+  return response;
+}
+
+/** Segundo paso de A1 con selección de restaurante: el token reemplaza al password. */
+export async function selectTenant(input: TenantSelectInput): Promise<AuthResponse> {
+  const response = await api.post<AuthResponse>('/auth/login/select', input);
   useSession.getState().setSession(response);
   return response;
 }
