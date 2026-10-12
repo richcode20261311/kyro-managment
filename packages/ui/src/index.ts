@@ -1,4 +1,5 @@
 export { cn } from './cn';
+export { formatCOP, formatDate, formatTime, formatPercent, formatDuration, formatDateHeader } from '@aki/shared';
 export { AppShell, type AppShellProps } from './shell/AppShell';
 export { Sidebar } from './shell/Sidebar';
 export { Topbar, type TopbarProps } from './shell/Topbar';
