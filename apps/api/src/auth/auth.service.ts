@@ -14,6 +14,7 @@ import type {
   RecoveryResetInput,
   RecoveryRequestInput,
   RecoveryVerifyInput,
+  SedeOption,
   TenantSelectInput,
   TenantSelectionChallenge,
 } from '@aki/shared';
@@ -236,6 +237,22 @@ export class AuthService {
     return this.prisma.$queryRaw<{ id: string; name: string; role: User['role'] }[]>`
       SELECT id, name, role FROM list_kiosk_employees(${slug})
     `;
+  }
+
+  /**
+   * Sedes activas del tenant autenticado (A4). El tenant llega ya validado
+   * por el token (lo resolvió el guard), nunca del cliente. Corre dentro de
+   * `withTenant`: las políticas RLS bloquean de todas formas cualquier intento
+   * de leer sedes de otro tenant, y solo devolvemos lo que la interfaz usa.
+   */
+  async sedes(tenantId: string): Promise<SedeOption[]> {
+    return withTenant(this.prisma, tenantId, (tx) =>
+      tx.sede.findMany({
+        where: { tenantId, active: true },
+        select: { id: true, name: true, active: true },
+        orderBy: { name: 'asc' },
+      }),
+    );
   }
 
   // ── Sesión (refresh y logout) ────────────────────────────────────────────

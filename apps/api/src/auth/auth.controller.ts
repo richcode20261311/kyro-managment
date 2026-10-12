@@ -7,9 +7,16 @@ import {
   Query,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import type { KioskQuery, LoginInput, PinLoginInput, TenantSelectionChallenge } from '@aki/shared';
+import type {
+  KioskQuery,
+  LoginInput,
+  PinLoginInput,
+  SedeOption,
+  TenantSelectionChallenge,
+} from '@aki/shared';
 import {
   kioskQuerySchema,
   loginSchema,
@@ -25,6 +32,7 @@ import {
 } from '@aki/shared';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { AuthService, REFRESH_COOKIE, REFRESH_COOKIE_PATH, type IssuedSession } from './auth.service';
+import { JwtAuthGuard, type AuthedRequest } from './jwt-auth.guard';
 import type { RequestMeta } from './token.types';
 
 function metaOf(req: Request): RequestMeta {
@@ -91,6 +99,20 @@ export class AuthController {
     @Query(new ZodValidationPipe(kioskQuerySchema)) query: KioskQuery,
   ): Promise<{ id: string; name: string; role: string }[]> {
     return this.auth.kioskEmployees(query.tenant);
+  }
+
+  /**
+   * A4: sedes activas del tenant autenticado. El tenant lo resuelve el servidor
+   * desde el token validado por `JwtAuthGuard` (nunca del cliente), y el
+   * servicio corre dentro de `withTenant` + RLS: no es posible leer sedes de
+   * otro restaurante manipulando parámetros. No lleva `PermissionsGuard`
+   * porque el proyecto no define aún un recurso `sede` en la matriz de
+   * permisos (bloqueo documentado en docs/PROGRESS.md).
+   */
+  @Get('sedes')
+  @UseGuards(JwtAuthGuard)
+  sedes(@Req() req: AuthedRequest): Promise<SedeOption[]> {
+    return this.auth.sedes(req.user!.tenantId);
   }
 
   @Post('pin-login')

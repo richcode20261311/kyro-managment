@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import type { AccessTokenPayload } from './token.types';
 
-interface AuthedRequest extends Request {
+export interface AuthedRequest extends Request {
   user?: AccessTokenPayload;
 }
 
