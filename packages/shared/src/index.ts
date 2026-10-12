@@ -38,6 +38,7 @@ export {
   type RecoveryRequestInput,
   type RecoveryResetInput,
   type RecoveryVerifyInput,
+  type SedeOption,
   type TenantOption,
   type TenantSelectInput,
   type TenantSelectionChallenge,

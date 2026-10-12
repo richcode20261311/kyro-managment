@@ -25,6 +25,16 @@ export interface TenantOption {
 }
 
 /**
+ * Sede activa del tenant autenticado (A4). El backend ya filtró por tenant y
+ * por `active: true`: el cliente no envía ni el tenant ni el estado.
+ */
+export interface SedeOption {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
+/**
  * Respuesta de `POST /auth/login` cuando el correo y la contraseña son válidos
  * en más de un restaurante: el servidor recién revela la lista después de
  * verificar la contraseña (no existe endpoint público que asocie correos con
