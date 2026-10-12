@@ -4,6 +4,7 @@ import type {
   LoginInput,
   LoginResult,
   PinLoginInput,
+  SedeOption,
   TenantSelectInput,
 } from '@aki/shared';
 import { isTenantSelection } from '@aki/shared';
@@ -46,6 +47,15 @@ export async function logout(): Promise<void> {
 export function getKioskEmployees(tenant: string): Promise<KioskEmployee[]> {
   const query = new URLSearchParams({ tenant });
   return api.get<KioskEmployee[]>(`/auth/employees?${query.toString()}`);
+}
+
+/**
+ * A4: sedes activas del tenant autenticado. El servidor resuelve el tenant
+ * desde el token (nada de slugs del cliente): el cliente solo recibe la lista
+ * y debe continuar a la apertura de turno cuando elige una sede válida.
+ */
+export function getSedes(): Promise<SedeOption[]> {
+  return api.get<SedeOption[]>('/auth/sedes');
 }
 
 export async function requestRecovery(email: string): Promise<void> {
