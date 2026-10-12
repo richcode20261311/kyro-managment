@@ -8,7 +8,8 @@
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:security": "bash test/security/battery.sh"
   },
   "dependencies": {
     "@aki/config": "workspace:*",

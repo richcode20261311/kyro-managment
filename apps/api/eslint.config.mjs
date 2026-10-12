@@ -18,4 +18,13 @@ export default [
       '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
+  {
+    // El lanzador de la batería de seguridad es un script Node CommonJS que
+    // carga fuera de árbol el build del API: `require()` dinámico es su
+    // mecanismo de arranque, no un import legacy (el fichero no es TS).
+    files: ['test/security/**/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 ];
