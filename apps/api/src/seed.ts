@@ -197,3 +197,8 @@ async function main(): Promise<void> {
 
   console.log('Seed completado: tenant "aki" con 2 sedes, 5 usuarios, permisos y notificaciones.');
 }
+
+void main().catch((error: unknown) => {
+  console.error('Error en el seed:', error);
+  process.exitCode = 1;
+});
