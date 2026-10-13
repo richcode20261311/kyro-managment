@@ -27,40 +27,40 @@ const DEV_USERS = [
     email: 'admin@aki.co',
     name: 'Andrea Ramírez',
     role: 'ADMINISTRADOR',
-    password: 'process.env[SEED_ADMIN_PASSWORD] ?? 'Admin1234!'',
-    pin: 'process.env[SEED_ADMIN_PIN] ?? '1111'',
+    password: process.env['SEED_ADMIN_PASSWORD'] ?? 'process.env[SEED_ADMIN_PASSWORD] ?? 'Admin1234!'',
+    pin: process.env['SEED_ADMIN_PIN'] ?? 'process.env[SEED_ADMIN_PIN] ?? '1111'',
     sedes: ['Sede Cajicá', 'Sede Chía'],
   },
   {
     email: 'cajero@aki.co',
     name: 'Camilo Torres',
     role: 'CAJERO',
-    password: 'process.env[SEED_CAJERO_PASSWORD] ?? 'Cajero1234!'',
-    pin: 'process.env[SEED_CAJERO_PIN] ?? '2222'',
+    password: process.env['SEED_CAJERO_PASSWORD'] ?? 'process.env[SEED_CAJERO_PASSWORD] ?? 'Cajero1234!'',
+    pin: process.env['SEED_CAJERO_PIN'] ?? 'process.env[SEED_CAJERO_PIN] ?? '2222'',
     sedes: ['Sede Cajicá'],
   },
   {
     email: 'mesero@aki.co',
     name: 'Valentina Rojas',
     role: 'MESERO',
-    password: 'process.env[SEED_MESERO_PASSWORD] ?? 'Mesero1234!'',
-    pin: 'process.env[SEED_MESERO_PIN] ?? '3333'',
+    password: process.env['SEED_MESERO_PASSWORD'] ?? 'process.env[SEED_MESERO_PASSWORD] ?? 'Mesero1234!'',
+    pin: process.env['SEED_MESERO_PIN'] ?? 'process.env[SEED_MESERO_PIN] ?? '3333'',
     sedes: ['Sede Cajicá'],
   },
   {
     email: 'cocinero@aki.co',
     name: 'Julián Ospina',
     role: 'COCINERO',
-    password: 'process.env[SEED_COCINERO_PASSWORD] ?? 'Cocina1234!'',
-    pin: 'process.env[SEED_COCINERO_PIN] ?? '4444'',
+    password: process.env['SEED_COCINERO_PASSWORD'] ?? 'process.env[SEED_COCINERO_PASSWORD] ?? 'Cocina1234!'',
+    pin: process.env['SEED_COCINERO_PIN'] ?? 'process.env[SEED_COCINERO_PIN] ?? '4444'',
     sedes: ['Sede Cajicá'],
   },
   {
     email: 'domiciliario@aki.co',
     name: 'Stiven Martínez',
     role: 'DOMICILIARIO',
-    password: 'process.env[SEED_DOMICILIARIO_PASSWORD] ?? 'Domi1234!'',
-    pin: 'process.env[SEED_DOMICILIARIO_PIN] ?? '5555'',
+    password: process.env['SEED_DOMICILIARIO_PASSWORD'] ?? 'process.env[SEED_DOMICILIARIO_PASSWORD] ?? 'Domi1234!'',
+    pin: process.env['SEED_DOMICILIARIO_PIN'] ?? 'process.env[SEED_DOMICILIARIO_PIN] ?? '5555'',
     sedes: ['Sede Cajicá'],
   },
 ] as const;
@@ -196,8 +196,6 @@ async function main(): Promise<void> {
   await prisma.$disconnect();
 
   console.log('Seed completado: tenant "aki" con 2 sedes, 5 usuarios, permisos y notificaciones.');
-  for (const dev of DEV_USERS) {
-  }
 }
 
 void main().catch((error: unknown) => {

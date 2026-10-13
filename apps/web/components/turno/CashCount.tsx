@@ -146,7 +146,7 @@ export function CashCount({ onChange, onAutofill, disabled = false }: CashCountP
           </p>
         </div>
         {onAutofill && (
-          <Button variant="secondary" className="hidden sm:inline-flex" onClick={handleAutofill} disabled={disabled}>
+          <Button variant="secondary" className="sm:inline-flex" onClick={handleAutofill} disabled={disabled}>
             {t.auth.turno.apertura.banners.autocompletar.replace('{monto}', formatCOP(BASE_SUGERIDA))}
           </Button>
         )}

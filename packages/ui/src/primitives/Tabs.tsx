@@ -35,7 +35,7 @@ export function Tabs({ items, value, onChange, className }: TabsProps) {
             id={`${baseId}-tab-${item.id}`}
             onClick={() => onChange(item.id)}
             className={cn(
-              'h-12 shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium',
+              'h-12 shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium overflow-hidden text-ellipsis',
               selected
                 ? 'border-aki-red text-aki-error'
                 : 'border-transparent text-aki-muted hover:text-aki-ink',

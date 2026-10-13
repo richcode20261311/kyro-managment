@@ -5,6 +5,8 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'aki_app') THEN
+    -- La contraseña se debe definir mediante variable de entorno PG_AKI_APP_PASSWORD
+    -- Valor de desarrollo: CHANGE_ME_IN_LOCAL
     CREATE ROLE aki_app LOGIN PASSWORD 'CHANGE_ME_IN_LOCAL';
   END IF;
 END

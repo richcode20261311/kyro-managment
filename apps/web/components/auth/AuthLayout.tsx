@@ -9,7 +9,7 @@ import { t } from '@aki/shared';
  */
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="grid min-h-dvh grid-cols-1 desktop:grid-cols-2">
+    <main className="grid min-h-dvh grid-cols-1 lg:grid-cols-2">
       <section className="flex flex-col items-center justify-center gap-6 bg-aki-bg px-6 py-12">
         <Image
           src="/brand/aki-logo.png"
@@ -17,7 +17,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
           width={180}
           height={180}
           priority
-          className="size-[180px] object-contain"
+          className="w-[150px] h-[150px] lg:w-[180px] lg:h-[180px] object-contain"
         />
         {/* Rojo oscuro (aki-error) en vez de aki-red: sobre el tinte al 10% el rojo puro no llega a AA (3.6:1). */}
         <span className="rounded-full bg-aki-red/10 px-3 py-1 text-sm font-semibold text-aki-error">

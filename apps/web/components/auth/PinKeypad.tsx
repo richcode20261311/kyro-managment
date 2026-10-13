@@ -205,7 +205,7 @@ export function PinKeypad({ onComplete, onChangeUser, disabled = false }: PinKey
       </div>
 
       {/* Teclado numérico 3x4 */}
-      <div className="grid grid-cols-3 gap-3 w-full max-w-[280px]" role="group" aria-label="Teclado PIN">
+      <div className="grid grid-cols-3 gap-3 w-full max-w-[90vw]" role="group" aria-label="Teclado PIN">
         {keys.map((key, idx) => {
           if (key.action === 'delete') {
             return (

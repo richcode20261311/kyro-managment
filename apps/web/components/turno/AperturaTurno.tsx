@@ -204,11 +204,11 @@ export function AperturaTurno() {
 
         {/* Stepper */}
         <div className="pt-5">
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 relative">
+          <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-2 -z-10" role="tablist" aria-label="Pasos de apertura">
             {STEPS.map((s) => (
-              <div key={s.number} className="flex items-center gap-3">
+              <div key={s.number} className="flex flex-col items-center gap-2 shrink-0 min-w-[120px] sm:min-w-0" role="tab" aria-selected={getStepStatus(s.number) === 'active'}>
                 {renderStepCircle(s.number)}
-                <div className="min-w-0">
+                <div className="min-w-0 text-center">
                   <div className={cn(
                     'text-[11px] font-bold uppercase tracking-wider',
                     getStepStatus(s.number) === 'completed' ? 'text-aki-green' :
@@ -225,8 +225,6 @@ export function AperturaTurno() {
                 </div>
               </div>
             ))}
-            {/* Líneas conectores */}
-            <div className="absolute top-4 left-1/2 right-1/2 h-0.5 bg-aki-line -z-10 lg:hidden" aria-hidden />
           </div>
         </div>
       </Card>
